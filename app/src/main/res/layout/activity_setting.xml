@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.huang.myapplication.system.SettingActivity">
+
+    <com.example.huang.myapplication.DrawableTextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_size"
+        android:background="#B8B8B8"
+        android:drawableStart="@drawable/back"
+        android:gravity="center"
+        android:text="@string/system"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#E5E5E5"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp">
+
+        <TextView
+            android:id="@+id/setting_tv_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="@string/IP"
+            android:textColor="#3F3F3F"
+            android:textSize="26sp"/>
+
+        <EditText
+            android:id="@+id/setting_edt_ip"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_toEndOf="@id/setting_tv_ip"
+            android:background="@drawable/edt_bg"
+            android:hint="@string/_ip"
+            android:inputType="phone"
+            android:labelFor="@id/setting_edt_ip"/>
+
+        <EditText
+            android:id="@+id/setting_edt_title"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/setting_edt_ip"
+            android:layout_below="@id/setting_edt_ip"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edt_bg"
+            android:hint="@string/school"
+            android:inputType="text"
+            android:labelFor="@id/setting_edt_title"/>
+
+        <TextView
+            android:id="@+id/setting_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/setting_edt_title"
+            android:layout_alignEnd="@id/setting_tv_ip"
+            android:text="@string/title"
+            android:textColor="#3F3F3F"
+            android:textSize="26sp"/>
+
+        <EditText
+            android:id="@+id/setting_edt_door"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/setting_edt_ip"
+            android:layout_below="@id/setting_edt_title"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edt_bg"
+            android:hint="@string/door"
+            android:inputType="text"
+            android:labelFor="@id/setting_edt_title"/>
+
+        <TextView
+            android:id="@+id/setting_tv_door"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/setting_edt_door"
+            android:layout_alignEnd="@id/setting_tv_ip"
+            android:text="@string/door"
+            android:textColor="#3F3F3F"
+            android:textSize="26sp"/>
+
+        <EditText
+            android:id="@+id/setting_edt_client_ip"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/setting_edt_ip"
+            android:layout_below="@id/setting_edt_door"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edt_bg"
+            android:hint="@string/client_ip"
+            android:inputType="text"
+            android:labelFor="@id/setting_edt_title"/>
+
+        <TextView
+            android:id="@+id/setting_tv_client_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/setting_edt_client_ip"
+            android:layout_alignEnd="@id/setting_tv_ip"
+            android:text="@string/client_ip"
+            android:textColor="#3F3F3F"
+            android:textSize="26sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/setting_tv_client_ip"
+            android:layout_marginBottom="20dp"
+            android:text="@string/wifi_set"
+            android:textColor="#000000"
+            android:textSize="28sp"/>
+    </RelativeLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/setting_srl"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="60">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/setting_rcv_wifi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="0.5">
+
+        <Button
+            android:id="@+id/btn_setting_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/btn_bg"
+            android:text="@string/quxiao"
+            android:textSize="32sp"/>
+
+        <Button
+            android:id="@+id/btn_setting_sure"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/btn_bg"
+            android:text="@string/sure"
+            android:textSize="32sp"/>
+    </LinearLayout>
+</LinearLayout>

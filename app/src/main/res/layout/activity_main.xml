@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context="com.example.huang.myapplication.main.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#0066cc">
+
+        <ImageView
+            android:id="@+id/connect_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="10dp"
+            android:src="@drawable/disconnect"/>
+        <TextView
+            android:id="@+id/connect_disconnect"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_gravity="center_vertical"
+            android:text="@string/state_disconnect"/>
+
+        <TextView
+            android:id="@+id/update_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:textSize="20sp"
+            android:textColor="#DC7484"
+            android:gravity="center"/>
+
+        <ImageView
+            android:id="@+id/custom_ui"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/zobao"
+            android:layout_marginEnd="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/school_name"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#0066cc"
+        android:gravity="center"
+        android:text="@string/school"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/layout_main"/>
+
+        <TextView
+            android:id="@+id/data_ip"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:background="#ccffff"
+            android:gravity="end"
+            android:paddingBottom="10dp"
+            android:paddingEnd="25dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="25dp"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/_ip"
+            android:textColor="#454545"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+</LinearLayout>

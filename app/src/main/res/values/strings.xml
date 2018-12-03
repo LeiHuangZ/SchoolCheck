@@ -1,0 +1,97 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="take">拍照</string>
+    <string name="school">深圳市XX高级中学</string>
+    <string name="stu_card">请读取学生证</string>
+    <string name="_ip">192.168.1.100</string>
+    <string name="quxiao">取消</string>
+    <string name="skip">跳过</string>
+    <string name="next">下一个</string>
+    <string name="confirm">确认发送所采集信息？</string>
+    <string name="input_num">点击此处输入来访者电话号码</string>
+    <string name="input_host_num">请输入受访者电话号码</string>
+    <string name="sure">确认</string>
+    <string name="system">系统配置</string>
+    <string name="IP">服务器地址</string>
+    <string name="title">标题名称</string>
+    <string name="door">大门名称</string>
+    <string name="client_ip">客户端IP</string>
+    <string name="wifi_close">Wifi已关闭，点击此处开启Wifi</string>
+    <string name="wifi_set">WIFI连接配置</string>
+    <string name="system_wifi">系统WiFi界面</string>
+    <string name="state_disconnect">与服务器连接断开,重连中....</string>
+
+    <!-- Contact -->
+    <string name="separator">;</string>
+    <string name="comma">,</string>
+
+    <string name="action_settings">Version</string>
+
+    <string name="nan">男</string>
+    <string name="nv">女</string>
+
+    <string name="case1">汉</string>
+    <string name="case2">蒙古</string>
+    <string name="case3">回</string>
+    <string name="case4">藏</string>
+    <string name="case5">维吾尔</string>
+    <string name="case6">苗</string>
+    <string name="case7">彝</string>
+    <string name="case8">壮</string>
+    <string name="case9">布依</string>
+    <string name="case10">朝鲜</string>
+    <string name="case11">满</string>
+    <string name="case12">侗</string>
+    <string name="case13">瑶</string>
+    <string name="case14">白</string>
+    <string name="case15">土家</string>
+    <string name="case16">哈尼</string>
+    <string name="case17">哈萨克</string>
+    <string name="case18">傣</string>
+    <string name="case19">黎</string>
+    <string name="case20">傈傈</string>
+    <string name="case21">佤</string>
+    <string name="case22">畲</string>
+    <string name="case23">高山</string>
+    <string name="case24">拉祜</string>
+    <string name="case25">水</string>
+    <string name="case26">东乡</string>
+    <string name="case27">纳西</string>
+    <string name="case28">景颇</string>
+    <string name="case29">柯尔克孜</string>
+    <string name="case30">土</string>
+    <string name="case31">达斡尔</string>
+    <string name="case32">仫佬</string>
+    <string name="case33">羌</string>
+    <string name="case34">布朗族</string>
+    <string name="case35">撒拉</string>
+    <string name="case36">毛南</string>
+    <string name="case37">仡佬</string>
+    <string name="case38">锡伯</string>
+    <string name="case39">阿昌</string>
+    <string name="case40">普米</string>
+    <string name="case41">塔吉克</string>
+    <string name="case42">怒</string>
+    <string name="case43">乌兹别克</string>
+    <string name="case44">俄罗斯</string>
+    <string name="case45">鄂温克</string>
+    <string name="case46">德昂</string>
+    <string name="case47">保安</string>
+    <string name="case48">裕固</string>
+    <string name="case49">京</string>
+    <string name="case50">塔塔尔</string>
+    <string name="case51">独龙</string>
+    <string name="case52">鄂伦春</string>
+    <string name="case53">赫哲</string>
+    <string name="case54">门巴</string>
+    <string name="case55">珞巴</string>
+    <string name="case56">基诺</string>
+    <string name="default_min_zu">解析出错</string>
+    <string name="find">发现身份证!</string>
+    <string name="get">正在读取....</string>
+    <string name="get_success">读取身份证信息成功!</string>
+
+    <string name="custom_process">定制流程</string>
+    <string name="please_wait">稍等</string>
+    <string name="saving_setting">保存设置中....</string>
+</resources>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="455px"
+            android:background="@drawable/id_font"
+            android:layout_marginTop="30dp"
+            android:fitsSystemWindows="true">
+
+                <TextView
+                    android:id="@+id/editText_name"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="金阳"
+                    android:textSize="20sp"
+                    android:layout_marginStart="70dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="#3D3837"/>
+
+                <TextView
+                    android:id="@+id/editText_sex"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nv"
+                    android:layout_below="@id/editText_name"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginStart="70dp"
+                    android:textSize="16sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_nation"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/case1"
+                    android:layout_below="@id/editText_name"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginStart="150dp"
+                    android:textSize="16sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_year"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:text="1978"
+                    android:layout_below="@id/editText_sex"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="70dp"
+                    android:textSize="18sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_month"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:text="10"
+                    android:layout_below="@id/editText_sex"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="125dp"
+                    android:textSize="18sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_day"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:text="27"
+                    android:layout_below="@id/editText_sex"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="160dp"
+                    android:textSize="18sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_address"
+                    android:layout_width="180dp"
+                    android:layout_height="65dp"
+                    android:text="北京市西城区复兴门外大街999号院11号楼3单元502室"
+                    android:layout_below="@id/editText_year"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="70dp"
+                    android:textSize="18sp"
+                    android:textColor="#3D3837"/>
+                <TextView
+                    android:id="@+id/editText_IDCard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="110102197810272321"
+                    android:layout_below="@id/editText_address"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="130dp"
+                    android:textSize="20sp"
+                    android:textColor="#020201"/>
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="120dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/portrait"
+                    android:layout_toEndOf="@id/editText_day"
+                    android:layout_alignBottom="@id/editText_address"
+                    android:layout_marginStart="28dp"/>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="455px"
+            android:background="@drawable/id_back"
+            android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/editText_office"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="北京市公安局西城分区"
+                    android:textSize="18sp"
+                    android:layout_marginStart="155dp"
+                    android:layout_marginTop="160dp"
+                    android:textColor="#020201"/>
+                <TextView
+                    android:id="@+id/editText_effective"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2004.10.27-2024.10.26"
+                    android:textSize="18sp"
+                    android:layout_below="@id/editText_office"
+                    android:layout_marginStart="155dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#020201"/>
+
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:layout_marginBottom="10dp">
+                <Button
+                    android:id="@+id/button_cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:background="@drawable/btn_bg"
+                    android:layout_weight="1"
+                    android:textSize="32sp"
+                    android:text="取消" />
+
+                <Button
+                    android:id="@+id/button_next"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:background="@drawable/btn_bg"
+                    android:layout_weight="1"
+                    android:textSize="32sp"
+                    android:text="下一步"
+                    android:enabled="false"/>
+        </LinearLayout>
+
+</LinearLayout>

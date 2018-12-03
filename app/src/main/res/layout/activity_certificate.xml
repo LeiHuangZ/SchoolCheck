@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.huang.myapplication.certificate.CertificateActivity">
+
+    <include layout="@layout/layout_title_visitor" />
+
+    <Button
+        android:id="@+id/btn_IDCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="身份证"
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp" />
+
+    <Button
+        android:id="@+id/btn_driving_licence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="驾驶证"
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp" />
+
+    <Button
+        android:id="@+id/btn_carLicense"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="行驶证"
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp" />
+    <Button
+        android:id="@+id/btn_residence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="居住证"
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp" />
+    <Button
+        android:id="@+id/btn_passport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="  护照  "
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp" />
+</LinearLayout>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.huang.myapplication">
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- 振动权限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- 照相机权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 屏幕旋转权限 -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="true" />
+    <!-- 在SDCard中创建与删除文件权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 开启闪光灯权限 -->
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <!-- 开启NFC权限 -->
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/mybackupscheme"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:persistent="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".main.MainActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.LAUNCHER" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <!--隐藏桌面图标，通过隐式启动方式-->
+                <!--<data android:host="main_activity" android:scheme="com.android.example"/>-->
+            </intent-filter>
+        </activity>
+        <activity android:name=".plate.PlateActivity" />
+        <activity android:name=".certificate.CertificateActivity" />
+        <activity
+            android:name=".certificate.identification.handheld.instance.IDReadActivity"
+            android:theme="@style/AppTheme.Main">
+
+        </activity>
+        <activity android:name=".plate.RectPhoto" />
+        <!-- 驾驶和护照拍照界面 -->
+        <activity
+            android:name=".certificate.LicenseRectPhoto"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity android:name=".certificate.LicenseActivity" />
+        <activity android:name=".student.StuIDActivity" />
+        <activity android:name=".visitor.VisitorActivity" />
+        <activity android:name=".respondents.RespondentsActivity">
+        </activity>
+        <activity android:name=".end.EndActivity" />
+        <activity android:name=".student.FaceActivity" />
+        <activity android:name=".respondents.VisitorCardActivity">
+        </activity>
+        <activity android:name=".leave.VisitorFaceActivity" />
+        <activity android:name=".respondents.VisitorFaceTakeActivity">
+        </activity>
+        <activity android:name=".leave.VisitorIDActivity" />
+        <activity
+            android:name=".system.SettingActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden|stateAlwaysHidden" />
+
+        <service android:name=".MyService" />
+
+        <activity android:name="com.zsy.words.ConnectActivity">
+        </activity>
+        <activity android:name=".system.CustomActivity">
+        </activity>
+
+        <!-- 测试用Activity -->
+        <activity
+            android:name=".main.TestActivity"
+            android:theme="@style/AppTheme.Main">
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,26 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:orientation="vertical"
+             tools:context=".plate.RectPhoto">
+
+    <SurfaceView
+        android:id="@+id/previewSV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id="@+id/drawIV"
+        android:layout_width="480px"
+        android:layout_height="240px"
+        android:layout_gravity="center"
+        android:background="@drawable/img_bg" />
+
+    <ImageButton
+        android:id="@+id/photoImgBtn"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@drawable/take_picture" />
+</FrameLayout>

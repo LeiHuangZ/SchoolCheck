@@ -26,6 +26,8 @@ import android.widget.ImageButton;
 import com.example.huang.myapplication.utils.PhotoUtils;
 import com.example.huang.myapplication.R;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class RectPhoto extends Activity implements SurfaceHolder.Callback {
@@ -214,12 +216,26 @@ public class RectPhoto extends Activity implements SurfaceHolder.Callback {
             Bitmap bitmap = Bitmap.createBitmap(rotateBitmap,rotateBitmap.getWidth()/6,(rotateBitmap.getHeight()/32)*13,  (rotateBitmap.getWidth()/3)*2,(rotateBitmap.getHeight()/16)*3);
             //保存图片到sdcard
             if (null != bitmap) {
-                PhotoUtils.saveJpeg(RectPhoto.this,bitmap,flag1);
+                int options = compressImage(bitmap);
+                PhotoUtils.saveJpeg(RectPhoto.this,bitmap,options, flag1);
                 mPhotoImgBtn.setEnabled(true);
                 finish();
             }
         }
     };
+
+    private int compressImage(Bitmap image) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
+        int options = 100;
+        while ( baos.toByteArray().length / 1024>60) { //循环判断如果压缩后图片是否大于100kb,大于继续压缩
+            baos.reset();//重置baos即清空baos
+            options -= 4;//每次都减少3
+            image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中
+        }
+        return options;
+    }
 
     //拍照按键的监听
     public class PhotoOnClickListener implements OnClickListener {

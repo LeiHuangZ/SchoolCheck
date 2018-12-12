@@ -9,7 +9,9 @@ import android.util.Log;
 import com.example.huang.myapplication.main.MainActivity;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -115,4 +117,53 @@ public class PhotoUtils {
         }
     }
 
+    /**给定一个Bitmap，进行保存*/
+    public static void saveJpeg(Context context, Bitmap bm, int options, String flag1) {
+        String savePath = Environment.getExternalStorageDirectory().getPath() + "/tempPhoto/";
+        File folder = new File(savePath);
+        //如果文件夹不存在则创建
+        if (!folder.exists())
+        {
+            boolean makeDir = folder.mkdir();
+            Log.i(TAG, "saveJpeg: makeDir = " + makeDir);
+        }
+        long dataTake = System.currentTimeMillis();
+        String jpegName = savePath + dataTake + ".jpg";
+        Log.i(TAG, "savePath: jpegName = " + jpegName);
+        //File jpegFile = new File(jpegName);
+        try {
+            FileOutputStream fos = new FileOutputStream(jpegName);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+            //如果需要改变大小(默认的是宽960×高1280),如改成宽600×高800
+            bm.compress(Bitmap.CompressFormat.JPEG, options, bos);
+            Log.i(TAG, "saveJpeg: bitmap.width = " + bm.getWidth()+", " + "bitmap.height = " +bm.getHeight());
+            bos.flush();
+            bos.close();
+            //将图片路径存储至SP
+            PhotoUtils.savePath(context, MainActivity.count, flag1, jpegName);
+            byte[] jpgBody = getJPGBody(jpegName);
+            Log.e("Huang, PhotoUtils", "jpgBody.length = " + jpgBody.length);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static byte[] getJPGBody(String filePath) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(new File(filePath));
+            byte[] temp = new byte[1024];
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int len;
+            while ((len = fileInputStream.read(temp)) != -1) {
+                byteArrayOutputStream.write(temp, 0, len);
+            }
+            byteArrayOutputStream.close();
+            fileInputStream.close();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new byte[0];
+    }
 }

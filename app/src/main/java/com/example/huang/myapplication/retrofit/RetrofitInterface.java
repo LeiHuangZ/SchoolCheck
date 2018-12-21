@@ -26,4 +26,8 @@ public interface RetrofitInterface {
     @POST("queryTeachers.php")
     Call<ContactBean> queryTeachersInter(@Field("loginName") String loginName, @Field("numPerPage") int numPerPage, @Field("schName") String schName, @Field("schNameList[]")List<String> schNameList,
                                           @Field("pageNo")int pageNo, @Field("lastModifyTime") String lastModifyTime);
+
+    @FormUrlEncoded
+    @POST("uploadVisitors.php")
+    Call<ResponseBody> uploadVisitors(@Field("visitorsList[]") List visitorsList);
 }

@@ -75,6 +75,14 @@ public class ContactBean {
         public void setResultMessage(String resultMessage) {
             this.resultMessage = resultMessage;
         }
+
+        @Override
+        public String toString() {
+            return "ServerResultBean{" +
+                    "resultCode=" + resultCode +
+                    ", resultMessage='" + resultMessage + '\'' +
+                    '}';
+        }
     }
 
     public static class PageInfoBean {
@@ -326,6 +334,50 @@ public class ContactBean {
             public void setPhone(String phone) {
                 this.phone = phone;
             }
+
+            @Override
+            public String toString() {
+                return "ListBean{" +
+                        "createTime='" + createTime + '\'' +
+                        ", lastModifyTime='" + lastModifyTime + '\'' +
+                        ", loginName='" + loginName + '\'' +
+                        ", name='" + name + '\'' +
+                        ", schName='" + schName + '\'' +
+                        ", phone='" + phone + '\'' +
+                        '}';
+            }
         }
+
+        @Override
+        public String toString() {
+            return "PageInfoBean{" +
+                    "pageNum=" + pageNum +
+                    ", pageSize=" + pageSize +
+                    ", size=" + size +
+                    ", startRow=" + startRow +
+                    ", endRow=" + endRow +
+                    ", total='" + total + '\'' +
+                    ", pages=" + pages +
+                    ", firstPage=" + firstPage +
+                    ", prePage=" + prePage +
+                    ", nextPage=" + nextPage +
+                    ", lastPage=" + lastPage +
+                    ", isFirstPage=" + isFirstPage +
+                    ", isLastPage=" + isLastPage +
+                    ", hasPreviousPage=" + hasPreviousPage +
+                    ", hasNextPage=" + hasNextPage +
+                    ", navigatePages=" + navigatePages +
+                    ", navigatepageNums=" + navigatepageNums +
+                    ", list=" + list +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ContactBean{" +
+                "serverResult=" + serverResult +
+                ", pageInfo=" + pageInfo +
+                '}';
     }
 }

@@ -270,7 +270,7 @@ public class MainActivity extends BaseActivity {
 //                MyTask myTask = new MyTask(this);
 //                myTask.execute(5);
                 //TODO 2018/12/19 更新通讯录，更新UI
-                RetrofitHelper.getInstance().queryTeachers("", 0, "杭州校区", new ArrayList<String>(), 1, "2012-02-02 10:00:00",
+                RetrofitHelper.getInstance().queryTeachers("", 30, "杭州校区", new ArrayList<String>(), 1, "2018-01-16 15:31:27",
                         new RetrofitHelper.RetrofitListener() {
                     @Override
                     public void onResponse() {

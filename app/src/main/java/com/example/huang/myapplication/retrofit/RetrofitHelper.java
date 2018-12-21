@@ -44,6 +44,7 @@ public class RetrofitHelper {
             @Override
             public void onResponse(@NonNull Call<ContactBean> call, @NonNull Response<ContactBean> response) {
                 ContactBean body = response.body();
+                Log.i("Huang", "onResponse: " + body.toString());
                 List<ContactBean.PageInfoBean.ListBean> list = body.getPageInfo().getList();
                 Log.i("Huang, RetrofitHelper", "PageInfoBean.size = " + list.size());
             }

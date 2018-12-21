@@ -1,6 +1,8 @@
 package com.example.huang.myapplication.plate;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrixColorFilter;
@@ -12,6 +14,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -22,12 +25,26 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.OcrRequestParams;
+import com.baidu.ocr.sdk.model.OcrResponseResult;
+import com.example.huang.myapplication.main.MainActivity;
 import com.example.huang.myapplication.utils.PhotoUtils;
 import com.example.huang.myapplication.R;
+import com.example.huang.myapplication.utils.SpUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class RectPhoto extends Activity implements SurfaceHolder.Callback {
@@ -41,6 +58,7 @@ public class RectPhoto extends Activity implements SurfaceHolder.Callback {
     private AutoFocusCallback myAutoFocusCallback = null;
     public String flag1;//界面标签，存储图片路径时使用
     private Camera.Parameters parameters;
+    private SpUtils mSpUtils;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -219,7 +237,55 @@ public class RectPhoto extends Activity implements SurfaceHolder.Callback {
                 int options = compressImage(bitmap);
                 PhotoUtils.saveJpeg(RectPhoto.this,bitmap,options, flag1);
                 mPhotoImgBtn.setEnabled(true);
-                finish();
+                /*
+                 * 车牌识别，成功则返回，失败要求重新拍摄
+                 */
+                final ProgressDialog progressDialog = new ProgressDialog(RectPhoto.this);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage("正在识别车牌....");
+                progressDialog.show();
+                //获取存储的车牌路径
+                String filePath = PhotoUtils.getPath(RectPhoto.this, MainActivity.count, PhotoUtils.KEY_PLATE);
+                // 车牌识别参数设置
+                OcrRequestParams param = new OcrRequestParams();
+                // 设置image参数
+                param.setImageFile(new File(filePath));
+                // 调用车牌识别服务
+                OCR.getInstance(RectPhoto.this).recognizeLicensePlate(param, new OnResultListener<OcrResponseResult>() {
+                    @Override
+                    public void onResult(OcrResponseResult result) {
+                        // 调用成功，返回OcrResponseResult对象
+                        String jsonRes = result.getJsonRes();
+                        Log.v("Huang, RectPhoto", "jsonRes = " + jsonRes);
+                        try {
+                            JSONObject jsonObject = new JSONObject(jsonRes);
+                            JSONObject wordsResultObject = jsonObject.getJSONObject("words_result");
+                            String plateNum = wordsResultObject.getString("number");
+                            /*
+                             * 存储车牌号
+                             */
+                            if (mSpUtils == null) {
+                                mSpUtils = new SpUtils(RectPhoto.this);
+                            }
+                            mSpUtils.putPlateNum(MainActivity.count, plateNum);
+                            progressDialog.cancel();
+                            finish();
+                        } catch (JSONException e) {
+                            Log.e("Huang, RectPhoto", Log.getStackTraceString(e));
+                            resetShotState();
+                            progressDialog.cancel();
+                        }
+                    }
+
+                    @Override
+                    public void onError(OCRError error) {
+                        // 调用失败，返回OCRError对象
+                        Log.i("Huang, RectPhoto", "error.getCause = " + Log.getStackTraceString(error));
+                        resetShotState();
+                        progressDialog.cancel();
+                    }
+                });
             }
         }
     };
@@ -235,6 +301,24 @@ public class RectPhoto extends Activity implements SurfaceHolder.Callback {
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中
         }
         return options;
+    }
+
+    /**
+     * 车牌识别失败，重置拍照状态
+     */
+    private void resetShotState(){
+        Toast.makeText(RectPhoto.this, "车牌图片质量差请重新拍摄", Toast.LENGTH_SHORT).show();
+        //清除图片
+        PhotoUtils.clearPhoto(RectPhoto.this, MainActivity.count, PhotoUtils.KEY_PLATE);
+        //清除车牌号
+        if (mSpUtils == null){
+            mSpUtils = new SpUtils(RectPhoto.this);
+        }
+        mSpUtils.putPlateNum(MainActivity.count, "");
+        //重新开启预览
+        myCamera.startPreview();
+        mPhotoImgBtn.setEnabled(true);
+        isPreview = true;
     }
 
     //拍照按键的监听

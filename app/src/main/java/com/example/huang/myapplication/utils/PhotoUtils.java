@@ -143,7 +143,7 @@ public class PhotoUtils {
             //将图片路径存储至SP
             PhotoUtils.savePath(context, MainActivity.count, flag1, jpegName);
             byte[] jpgBody = getJPGBody(jpegName);
-            Log.e("Huang, PhotoUtils", "jpgBody.length = " + jpgBody.length);
+            Log.i("Huang, PhotoUtils", "savedPlate.length = " + jpgBody.length);
         } catch (IOException e) {
             e.printStackTrace();
         }

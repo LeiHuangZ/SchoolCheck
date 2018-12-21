@@ -97,7 +97,6 @@ public class VisitorCardActivity extends BaseActivity {
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
             super.handleMessage(msg);
             switch(msg.what){
                 case 0:

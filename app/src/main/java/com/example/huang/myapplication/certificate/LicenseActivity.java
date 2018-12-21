@@ -13,9 +13,11 @@ import android.widget.Toast;
 
 import com.example.huang.myapplication.BaseActivity;
 import com.example.huang.myapplication.DrawableTextView;
+import com.example.huang.myapplication.plate.PlateActivity;
 import com.example.huang.myapplication.utils.PhotoUtils;
 import com.example.huang.myapplication.R;
 import com.example.huang.myapplication.main.MainActivity;
+import com.example.huang.myapplication.utils.SpUtils;
 import com.example.huang.myapplication.visitor.VisitorActivity;
 
 import butterknife.BindView;
@@ -37,6 +39,7 @@ public class LicenseActivity extends BaseActivity {
     private static boolean FLAG = false;
     /**存储图片的KEY，通过判断界面类型，赋予不同的值*/
     private static String KEY;
+    private SpUtils mSpUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +86,7 @@ public class LicenseActivity extends BaseActivity {
             case R.id.take_photo:
                 if (FLAG){
                     FLAG = false;
-                    PhotoUtils.clearPhoto(this, MainActivity.count, KEY);
+                    clearData();
                 }
                 Intent intent = new Intent(LicenseActivity.this, LicenseRectPhoto.class);
                 intent.putExtra("flag", KEY);
@@ -92,7 +95,7 @@ public class LicenseActivity extends BaseActivity {
             case R.id.cancel:
                 //取消操作，返回主界面
                 startActivity(new Intent(LicenseActivity.this, MainActivity.class));
-                PhotoUtils.clearPhoto(this, MainActivity.count, KEY);
+                clearData();
                 break;
             case R.id.next:
                 startActivity(new Intent(LicenseActivity.this, VisitorActivity.class));
@@ -105,16 +108,44 @@ public class LicenseActivity extends BaseActivity {
     //按下返回键，清除本页收集的数据
     @Override
     public void onBackPressed() {
-        PhotoUtils.clearPhoto(this, MainActivity.count, KEY);
+        clearData();
         finish();
+    }
+
+    /**
+     * 清除存储的数据
+     */
+    private void clearData(){
+        PhotoUtils.clearPhoto(this, MainActivity.count, KEY);
+        if (mSpUtils == null){
+            mSpUtils = new SpUtils(LicenseActivity.this);
+        }
+        //删除存储的上次存储的姓名、性别、地址、身份证号
+        mSpUtils.saveName(MainActivity.count, "");
+        mSpUtils.saveSex(MainActivity.count, -1);
+        mSpUtils.saveAddress(MainActivity.count, "");
+        mSpUtils.saveIdentity(MainActivity.count, "");
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //Todo 2018/12/19 测试,正式删除 获取存储身份信息
+        if (mSpUtils == null) {
+            mSpUtils = new SpUtils(this);
+        }
+        String name = mSpUtils.getName(MainActivity.count);
+        int sex = mSpUtils.getSex(MainActivity.count);
+        String address = mSpUtils.getAddress(MainActivity.count);
+        String identity = mSpUtils.getIdentity(MainActivity.count);
+        Log.v("Huang, PlateActivity", "saved name = " + name);
+        Log.v("Huang, PlateActivity", "saved sex = " + sex);
+        Log.v("Huang, PlateActivity", "saved address = " + address);
+        Log.v("Huang, PlateActivity", "saved identity = " + identity);
         String license = PhotoUtils.getPath(this, MainActivity.count, KEY);
         Bitmap bitmap = BitmapFactory.decodeFile(license);
         if (bitmap == null) {
+            mImgTipsLicense.setImageDrawable(getDrawable(R.drawable.licence));
             Toast.makeText(this, "取消了拍照", Toast.LENGTH_SHORT).show();
             return;
         }

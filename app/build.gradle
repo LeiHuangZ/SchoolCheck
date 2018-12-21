@@ -43,4 +43,17 @@ dependencies {
     implementation files('libs/zkandroididcardreader.jar')
     implementation files('libs/zkandroidnidfpsensor.jar')
     implementation files('libs/ZstCardApi.jar')
+    /*
+         * Retrofit2
+         */
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    /*
+         * 解析Gson数据的Gson
+         */
+    implementation 'com.google.code.gson:gson:2.8.2'
+    /*
+         * 车牌、驾驶证、居住证识别功能
+         */
+    implementation files('libs/ocr-sdk.jar')
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 }

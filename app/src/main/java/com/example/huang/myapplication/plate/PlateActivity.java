@@ -4,12 +4,21 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.OcrRequestParams;
+import com.baidu.ocr.sdk.model.OcrResponseResult;
 import com.example.huang.myapplication.BaseActivity;
 import com.example.huang.myapplication.DrawableTextView;
 import com.example.huang.myapplication.end.EndActivity;
@@ -17,6 +26,9 @@ import com.example.huang.myapplication.main.MainActivity;
 import com.example.huang.myapplication.utils.PhotoUtils;
 import com.example.huang.myapplication.R;
 import com.example.huang.myapplication.certificate.CertificateActivity;
+import com.example.huang.myapplication.utils.SpUtils;
+
+import java.io.File;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,6 +44,7 @@ public class PlateActivity extends BaseActivity {
     @BindView(R.id.take_photo)
     Button takePhoto;
     private boolean FLAG = false;
+    private SpUtils mSpUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +71,13 @@ public class PlateActivity extends BaseActivity {
             case R.id.take_photo:
                 if (FLAG) {
                     FLAG = false;
+                    //重拍删除拍摄的照片
                     PhotoUtils.clearPhoto(this, MainActivity.count, PhotoUtils.KEY_PLATE);
+                    if (mSpUtils == null){
+                        mSpUtils = new SpUtils(PlateActivity.this);
+                    }
+                    //删除存储的本条记录的车牌号
+                    mSpUtils.putPlateNum(MainActivity.count, "");
                 }
                 Intent intent = new Intent(PlateActivity.this, RectPhoto.class);
                 intent.putExtra("flag", PhotoUtils.KEY_PLATE);
@@ -89,10 +108,17 @@ public class PlateActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //Todo 2018/12/19 测试,正式删除 获取存储的车牌号
+        if (mSpUtils == null) {
+            mSpUtils = new SpUtils(this);
+        }
+        String plateNum = mSpUtils.getPlateNum(MainActivity.count);
+        Log.v("Huang, PlateActivity", "saved plateNum = " + plateNum);
         String licensePlate = PhotoUtils.getPath(this, MainActivity.count, PhotoUtils.KEY_PLATE);
-        Bitmap bitmap = BitmapFactory.decodeFile(licensePlate);
+        final Bitmap bitmap = BitmapFactory.decodeFile(licensePlate);
         if (bitmap == null) {
             Toast.makeText(this, "取消了拍照", Toast.LENGTH_SHORT).show();
+            carCard.setImageDrawable(getDrawable(R.drawable.car_card));
             return;
         }
         carCard.setImageBitmap(bitmap);

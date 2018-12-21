@@ -42,7 +42,7 @@ public class CertificateActivity extends BaseActivity {
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.scienceBlue));
     }
 
-    @OnClick({R.id.btn_IDCard, R.id.btn_driving_licence, R.id.btn_passport, R.id.btn_residence, R.id.btn_carLicense})
+    @OnClick({R.id.btn_IDCard, R.id.btn_driving_licence, R.id.btn_passport, R.id.btn_residence, R.id.btn_carLicense, R.id.btn_other})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             //开启身份证扫描界面
@@ -74,6 +74,9 @@ public class CertificateActivity extends BaseActivity {
                 //标签 ，3 --> 行驶证
                 intent3.addFlags(3);
                 startActivity(intent3);
+                break;
+            case R.id.btn_other:
+                startActivity(new Intent(CertificateActivity.this, OtherActivity.class));
                 break;
             default:
                 break;

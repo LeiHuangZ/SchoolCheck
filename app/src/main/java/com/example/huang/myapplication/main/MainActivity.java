@@ -19,6 +19,7 @@ import com.example.huang.myapplication.BaseActivity;
 import com.example.huang.myapplication.R;
 import com.example.huang.myapplication.certificate.CertificateActivity;
 import com.example.huang.myapplication.leave.VisitorFaceActivity;
+import com.example.huang.myapplication.retrofit.RetrofitHelper;
 import com.example.huang.myapplication.student.FaceActivity;
 import com.example.huang.myapplication.system.CustomActivity;
 import com.example.huang.myapplication.system.SettingActivity;
@@ -31,6 +32,7 @@ import com.example.huang.myapplication.utils.UiSpUtils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -105,8 +107,8 @@ public class MainActivity extends BaseActivity {
         }
 
         //同步通讯录
-        MyTask myTask = new MyTask(this);
-        myTask.execute(5);
+//        MyTask myTask = new MyTask(this);
+//        myTask.execute(5);
         mMainBtnRefresh.setEnabled(false);
         executorService.execute(new Runnable() {
             @Override
@@ -265,8 +267,21 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.main_btn_refresh:
                 //同步通讯录
-                MyTask myTask = new MyTask(this);
-                myTask.execute(5);
+//                MyTask myTask = new MyTask(this);
+//                myTask.execute(5);
+                //TODO 2018/12/19 更新通讯录，更新UI
+                RetrofitHelper.getInstance().queryTeachers("", 0, "杭州校区", new ArrayList<String>(), 1, "2012-02-02 10:00:00",
+                        new RetrofitHelper.RetrofitListener() {
+                    @Override
+                    public void onResponse() {
+
+                    }
+
+                    @Override
+                    public void onFailure() {
+
+                    }
+                });
                 Log.i(TAG, "onViewClicked: ");
                 mMainBtnRefresh.setEnabled(false);
 //                mExecutorService.execute(new Runnable() {
@@ -306,6 +321,8 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        // TODO 2018/12/19 正式发布版本时，删除以屏蔽返回键
+        super.onBackPressed();
     }
 
     private int versionNameToInt(String versionName) {

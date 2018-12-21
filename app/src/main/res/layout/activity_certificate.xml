@@ -48,7 +48,8 @@
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
         android:paddingLeft="70dp"
-        android:paddingRight="70dp" />
+        android:paddingRight="70dp"
+        android:visibility="gone"/>
     <Button
         android:id="@+id/btn_residence"
         android:layout_width="wrap_content"
@@ -63,6 +64,19 @@
         android:paddingLeft="70dp"
         android:paddingRight="70dp" />
     <Button
+        android:id="@+id/btn_other"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_bg"
+        android:text="  其他  "
+        android:textSize="28sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="70dp"
+        android:paddingRight="70dp"/>
+    <Button
         android:id="@+id/btn_passport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,5 +88,6 @@
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
         android:paddingLeft="70dp"
-        android:paddingRight="70dp" />
+        android:paddingRight="70dp"
+        android:visibility="gone"/>
 </LinearLayout>

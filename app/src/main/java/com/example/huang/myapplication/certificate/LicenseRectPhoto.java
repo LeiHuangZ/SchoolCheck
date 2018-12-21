@@ -2,6 +2,7 @@ package com.example.huang.myapplication.certificate;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -27,10 +29,25 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.IDCardParams;
+import com.baidu.ocr.sdk.model.IDCardResult;
+import com.baidu.ocr.sdk.model.OcrRequestParams;
+import com.baidu.ocr.sdk.model.OcrResponseResult;
 import com.example.huang.myapplication.R;
+import com.example.huang.myapplication.main.MainActivity;
+import com.example.huang.myapplication.plate.RectPhoto;
 import com.example.huang.myapplication.utils.PhotoUtils;
+import com.example.huang.myapplication.utils.SpUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.io.IOException;
 
 import butterknife.BindView;
@@ -45,7 +62,9 @@ public class LicenseRectPhoto extends Activity implements SurfaceHolder.Callback
     //private static String TAG = LicenseRectPhoto.class.getSimpleName();
     @BindView(R.id.license_photo_tv_tip)
     TextView mLicensePhotoTvTip;
-    /** 拍照按钮 */
+    /**
+     * 拍照按钮
+     */
     @BindView(R.id.photoImgBtn)
     MyView mPhotoImgBtn;
     private boolean isPreview = false;
@@ -55,6 +74,7 @@ public class LicenseRectPhoto extends Activity implements SurfaceHolder.Callback
     private AutoFocusCallback myAutoFocusCallback = null;
     public String flag1;//界面标签，存储图片路径时使用
     private Camera.Parameters parameters;
+    private SpUtils mSpUtils;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -233,10 +253,177 @@ public class LicenseRectPhoto extends Activity implements SurfaceHolder.Callback
             //保存图片到sdcard
             if (null != bitmap) {
                 PhotoUtils.saveJpeg(LicenseRectPhoto.this, bitmap, flag1);
-                finish();
+                /*
+                 * 证件识别，成功则返回，失败要求重新拍摄
+                 */
+                final ProgressDialog progressDialog = new ProgressDialog(LicenseRectPhoto.this);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage("正在识别证件....");
+                progressDialog.show();
+                //获取存储的车牌路径
+                String filePath = PhotoUtils.getPath(LicenseRectPhoto.this, MainActivity.count, flag1);
+                if (flag1.equals(PhotoUtils.KEY_LICENSE)) {
+                    // 驾驶证识别参数设置
+                    OcrRequestParams param = new OcrRequestParams();
+                    // 设置image参数
+                    param.setImageFile(new File(filePath));
+                    // 设置其他参数
+                    param.putParam("detect_direction", true);
+                    // 调用驾驶证识别服务
+                    OCR.getInstance(LicenseRectPhoto.this).recognizeDrivingLicense(param, new OnResultListener<OcrResponseResult>() {
+                        @Override
+                        public void onResult(OcrResponseResult result) {
+                            // 调用成功，返回OcrResponseResult对象
+                            String jsonRes = result.getJsonRes();
+                            Log.v("Huang, RectPhoto", "jsonRes = " + jsonRes);
+                            try {
+                                JSONObject jsonObject = new JSONObject(jsonRes);
+                                JSONObject wordsResultObject = jsonObject.getJSONObject("words_result");
+                                JSONObject nameObject = wordsResultObject.getJSONObject("姓名");
+                                String name = nameObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "name = " + name);
+                                JSONObject sexObject = wordsResultObject.getJSONObject("性别");
+                                String sexStr = sexObject.getString("words");
+                                int sex = -1;
+                                if (sexStr.equals("男")){
+                                    sex = 1;
+                                } else if (sexStr.equals("女")){
+                                    sex = 2;
+                                }
+                                Log.v("Huang, LicenseRectPhoto", "sex = " + sex);
+                                JSONObject addressObject = wordsResultObject.getJSONObject("住址");
+                                String address = addressObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "address = " + address);
+                                JSONObject idCardNumObject = wordsResultObject.getJSONObject("证号");
+                                String idCardNum = idCardNumObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "idCardNum = " + idCardNum);
+                                if (!name.equals("")&&sex!=-1&&!address.equals("")&&!idCardNum.equals("")) {
+                                    /*
+                                     * 存储姓名，性别，地址，身份证号
+                                     */
+                                    if (mSpUtils == null) {
+                                        mSpUtils = new SpUtils(LicenseRectPhoto.this);
+                                    }
+                                    mSpUtils.saveName(MainActivity.count, name);
+                                    mSpUtils.saveSex(MainActivity.count, sex);
+                                    mSpUtils.saveAddress(MainActivity.count, address);
+                                    mSpUtils.saveIdentity(MainActivity.count, idCardNum);
+                                    progressDialog.cancel();
+                                    finish();
+                                } else {
+                                    resetShotState();
+                                    progressDialog.cancel();
+                                }
+                            } catch (JSONException e) {
+                                Log.e("Huang, RectPhoto", Log.getStackTraceString(e));
+                                resetShotState();
+                                progressDialog.cancel();
+                            }
+                        }
+
+                        @Override
+                        public void onError(OCRError error) {
+                            // 调用失败，返回OCRError对象
+                            Log.i("Huang, RectPhoto", "error.getCause = " + Log.getStackTraceString(error));
+                            resetShotState();
+                            progressDialog.cancel();
+                        }
+                    });
+                }else {
+                    // 身份证识别参数设置
+                    IDCardParams param = new IDCardParams();
+                    param.setImageFile(new File(filePath));
+                    // 设置身份证正面
+                    param.setIdCardSide(IDCardParams.ID_CARD_SIDE_FRONT);
+                    // 设置方向检测
+                    param.setDetectDirection(true);
+                    param.setImageFile(new File(filePath));
+                    // 调用身份证识别服务
+                    OCR.getInstance(LicenseRectPhoto.this).recognizeIDCard(param, new OnResultListener<IDCardResult>() {
+                        @Override
+                        public void onResult(IDCardResult result) {
+                            // 调用成功，返回IDCardResult对象
+                            String jsonRes = result.getJsonRes();
+                            Log.v("Huang, LicenseRectPhoto", "jsonRes = " + jsonRes);
+                            try{
+                                JSONObject jsonObject = new JSONObject(jsonRes);
+                                JSONObject wordsResultObject = jsonObject.getJSONObject("words_result");
+                                JSONObject nameObject = wordsResultObject.getJSONObject("姓名");
+                                String name = nameObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "name = " + name);
+                                JSONObject sexObject = wordsResultObject.getJSONObject("性别");
+                                String sexStr = sexObject.getString("words");
+                                int sex = -1;
+                                if (sexStr.equals("男")){
+                                    sex = 1;
+                                } else if (sexStr.equals("女")){
+                                    sex = 2;
+                                }
+                                Log.v("Huang, LicenseRectPhoto", "sex = " + sex);
+                                JSONObject addressObject = wordsResultObject.getJSONObject("住址");
+                                String address = addressObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "address = " + address);
+                                JSONObject idCardNumObject = wordsResultObject.getJSONObject("公民身份号码");
+                                String idCardNum = idCardNumObject.getString("words");
+                                Log.v("Huang, LicenseRectPhoto", "idCardNum = " + idCardNum);
+                                if (!name.equals("")&&sex!=-1&&!address.equals("")&&!idCardNum.equals("")){
+                                    /*
+                                     * 存储姓名，性别，地址，身份证号
+                                     */
+                                    if (mSpUtils == null) {
+                                        mSpUtils = new SpUtils(LicenseRectPhoto.this);
+                                    }
+                                    mSpUtils.saveName(MainActivity.count, name);
+                                    mSpUtils.saveSex(MainActivity.count, sex);
+                                    mSpUtils.saveAddress(MainActivity.count, address);
+                                    mSpUtils.saveIdentity(MainActivity.count, idCardNum);
+                                    progressDialog.cancel();
+                                    finish();
+                                } else {
+                                    resetShotState();
+                                    progressDialog.cancel();
+                                }
+                            }catch (JSONException e){
+                                Log.e("Huang, RectPhoto", Log.getStackTraceString(e));
+                                resetShotState();
+                                progressDialog.cancel();
+                            }
+                        }
+                        @Override
+                        public void onError(OCRError error) {
+                            // 调用失败，返回OCRError对象
+                            Log.e("Huang, RectPhoto", Log.getStackTraceString(error));
+                            resetShotState();
+                            progressDialog.cancel();
+                        }
+                    });
+
+                }
             }
         }
     };
+
+    /**
+     * 证件识别失败，重置拍照状态
+     */
+    private void resetShotState(){
+        Toast.makeText(LicenseRectPhoto.this, "证件图片质量差请重新拍摄", Toast.LENGTH_SHORT).show();
+        //清除图片
+        PhotoUtils.clearPhoto(LicenseRectPhoto.this, MainActivity.count, flag1);
+        //清除存储的存储的姓名、性别、地址、身份证号
+        if (mSpUtils == null){
+            mSpUtils = new SpUtils(LicenseRectPhoto.this);
+        }
+        mSpUtils.saveName(MainActivity.count, "");
+        mSpUtils.saveSex(MainActivity.count, -1);
+        mSpUtils.saveAddress(MainActivity.count, "");
+        mSpUtils.saveIdentity(MainActivity.count, "");
+        //重新开启预览
+        myCamera.startPreview();
+        mPhotoImgBtn.setEnabled(true);
+        isPreview = true;
+    }
 
     /**
      * 拍照按键的监听
@@ -255,7 +442,7 @@ public class LicenseRectPhoto extends Activity implements SurfaceHolder.Callback
     /**
      * 为了使图片按钮按下和弹起状态不同，采用过滤颜色的方法.按下的时候让图片颜色变淡
      */
-    private OnTouchListener mOnTouchListener = new OnTouchListener(){
+    private OnTouchListener mOnTouchListener = new OnTouchListener() {
 
         final float[] BT_SELECTED = new float[]{2, 0, 0, 0, 2, 0, 2, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 0, 1, 0};
 

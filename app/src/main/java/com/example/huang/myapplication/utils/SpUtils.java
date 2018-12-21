@@ -32,14 +32,24 @@ public class SpUtils {
         edit.apply();
     }
 
+//    public void saveSexStr(long num, String sex) {
+//        SharedPreferences.Editor edit = mPreferences.edit();
+//        edit.putString("saveSex"+num, sex);
+//        edit.apply();
+//    }
+
     /**
      * 获取性别
      *
      * @return 性别
      */
-    int getSex(long num) {
+    public int getSex(long num) {
         return mPreferences.getInt("saveSex"+num, -1);
     }
+
+//    public String getSexStr(long num) {
+//        return mPreferences.getString("saveSex"+num, "");
+//    }
 
     /**
      * 存储身份证号
@@ -57,7 +67,7 @@ public class SpUtils {
      *
      * @return 身份证号
      */
-    String getIdentity(long num) {
+    public String getIdentity(long num) {
         return mPreferences.getString("saveIdentity"+num, "");
     }
 
@@ -135,7 +145,7 @@ public class SpUtils {
      *
      * @return 身份证地址
      */
-    String getAddress(long num) {
+    public String getAddress(long num) {
         return mPreferences.getString("saveAddress"+num, "");
     }
 
@@ -212,6 +222,24 @@ public class SpUtils {
      */
     public String getStuCard(long num) {
         return mPreferences.getString("StuCard"+num, "");
+    }
+
+    /**
+     * 存储车牌号
+     * @param num 记录编码
+     * @param plateNum 车牌号
+     */
+    public void putPlateNum(long num, String plateNum){
+        mPreferences.edit().putString("PlateNum"+num, plateNum).apply();
+    }
+
+    /**
+     * 获取存储车牌号
+     * @param num 记录编码
+     * @return 存储的车牌号
+     */
+    public String getPlateNum(long num){
+        return mPreferences.getString("PlateNum"+num, "");
     }
 
     /**

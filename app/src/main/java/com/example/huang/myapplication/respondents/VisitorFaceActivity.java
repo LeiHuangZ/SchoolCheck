@@ -90,7 +90,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
 
             @Override
             public void onAutoFocus(boolean success, Camera camera) {
-                // TODO Auto-generated method stub
                 if (success)//success表示对焦成功
                 {
                     myCamera.cancelAutoFocus();
@@ -155,7 +154,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     // 当SurfaceView/预览界面的格式和大小发生改变时，该方法被调用
     {
-        // TODO Auto-generated method stub
         Log.i(tag, "SurfaceHolder.Callback:surfaceChanged!");
         myCamera.cancelAutoFocus();
         initCamera();
@@ -166,7 +164,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
     public void surfaceCreated(SurfaceHolder holder)
     // SurfaceView启动时/初次实例化，预览界面被创建时，该方法被调用。
     {
-        // TODO Auto-generated method stub
         if (myCamera == null) {
             myCamera = Camera.open();
         }
@@ -177,7 +174,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
             myCamera.setPreviewDisplay(mySurfaceHolder);
             Log.i(tag, "SurfaceHolder.Callback: surfaceCreated!");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             if (null != myCamera) {
                 myCamera.release();
                 myCamera = null;
@@ -220,7 +216,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
     {
         @Override
         public void onShutter() {
-            // TODO Auto-generated method stub
             Log.i(tag, "myShutterCallback:onShutter...");
         }
     };
@@ -229,7 +224,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
     {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            // TODO Auto-generated method stub
             Log.i(tag, "myRawCallback:onPictureTaken...");
 
         }
@@ -239,7 +233,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
     {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            // TODO Auto-generated method stub
             Log.i(tag, "myJpegCallback:onPictureTaken...");
             if (null != data) {
                 //data是字节数据，将其解析成位图
@@ -298,7 +291,6 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            // TODO Auto-generated method stub
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 v.getBackground().setColorFilter(new ColorMatrixColorFilter(BT_SELECTED));
                 v.setBackgroundDrawable(v.getBackground());

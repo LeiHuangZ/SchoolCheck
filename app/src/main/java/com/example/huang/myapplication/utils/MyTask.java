@@ -5,19 +5,20 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 
-import com.example.huang.myapplication.R;
-import com.example.huang.myapplication.greendao.PersonDaoManager;
 import com.example.huang.myapplication.main.MainActivity;
-import com.zsy.words.bean.Person;
+import com.example.huang.myapplication.retrofit.RetrofitHelper;
+import com.example.huang.myapplication.retrofit.VisitorComeBean;
+import com.example.huang.myapplication.retrofit.StudentLeave;
+import com.example.huang.myapplication.retrofit.VisitorsLeave;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,13 +27,13 @@ import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import okio.Buffer;
+
+import static com.example.huang.myapplication.utils.Tools.formateTime;
 
 /**
  * @author Administrator
@@ -101,7 +102,6 @@ public class MyTask extends AsyncTask<Integer, Integer, String> {
                 sendUpdate();
                 break;
             default:
-                getConnect();
                 break;
         }
         return null;
@@ -211,91 +211,114 @@ public class MyTask extends AsyncTask<Integer, Integer, String> {
      */
     private void sendVisitor(final Context context) {
         try {
-            mIP = new SpUtils(context).getIP();
             SpUtils spUtils = new SpUtils(context);
-            String identity = spUtils.getIdentity(mNum);
-            String idPath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_IDENTIFY);
-            byte[] licenseByte = getJPGBody(idPath);
-            String platePath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_PLATE);
-            byte[] plateByte = getJPGBody(platePath);
+            String schName = spUtils.getSchool();
+            String carNo = spUtils.getPlateNum(mNum);
+            String visitTime = formateTime(System.currentTimeMillis());
+            String visitPhone = spUtils.getVisitorNbr(mNum);
+            String deviceId = spUtils.getIMEI();
+            String staffPhone = spUtils.getPhoneNbr(mNum);
+            String position = spUtils.getDoorName();
+            String name = spUtils.getName(mNum);
+            String identityCard = spUtils.getIdentity(mNum);
+            String sex = String.valueOf(spUtils.getSex(mNum));
+            String address = spUtils.getAddress(mNum);
+            String visittype = "拜访";
+            String visitorCard = spUtils.getVisitorCard(mNum);
+//            String visitorCard = "CD23BA12";
+            String visitCardC8 = Tools.convertCarno(Tools.EIGHT_POSITIVE, visitorCard);
+            String visitCardC10 = Tools.convertCarno(Tools.TEN_POSITIVE, visitorCard);
+            String visitCardR8 = Tools.convertCarno(Tools.EIGHT_REVERSE, visitorCard);
+            String visitCardR10 = Tools.convertCarno(Tools.TEN_REVERSE, visitorCard);
             String facePath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_VISITOR_FACE);
             byte[] faceByte = getJPGBody(facePath);
-            String licensePath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_LICENSE);
-            int nType = -1;
-            if (licenseByte.length != 0) {
-                nType = 0;
-            } else {
-                licenseByte = getJPGBody(licensePath);
-                if (licenseByte.length == 0) {
-                    licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_CAR_LICENSE));
-                    if (licenseByte.length != 0) {
-                        nType = 2;
-                    } else {
-                        licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_RESIDENCE));
-                        if (licenseByte.length != 0) {
-                            nType = 3;
-                        } else {
-                            licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_PASSPORT));
-                            if (licenseByte.length != 0) {
-                                nType = 4;
-                            }
-                        }
-                    }
-                } else {
-                    nType = 1;
-                }
-            }
-            Log.i(TAG, "sendVisitor, nType = " + nType);
-            String phoneNbr = spUtils.getPhoneNbr(mNum);
-            String visitorNbr = spUtils.getVisitorNbr(mNum);
-            String address = spUtils.getAddress(mNum);
-            Log.i(TAG, "sendVisitor, address = " + address + "---len = " + address.length());
-            String name = spUtils.getName(mNum);
-            String addTime = spUtils.getAddTime(mNum);
-            String doorName = spUtils.getDoorName() + "\0";
-            String cCardno = spUtils.getVisitorCard(mNum);
-            String clientIP = spUtils.getClientIP();
-            int sex = spUtils.getSex(mNum);
-            byte[] visitorBody = getVisitorBody(identity, licenseByte, plateByte, faceByte, phoneNbr, visitorNbr, address, name, addTime, doorName, nType, cCardno, clientIP, sex);
-            byte[] header = getHeader("zobaotmvisit\0", 368928);
+            String visitorImg = Base64.encodeToString(faceByte, Base64.DEFAULT);
+            String platePath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_PLATE);
+            byte[] plateByte = getJPGBody(platePath);
+            String carImg = Base64.encodeToString(plateByte, Base64.DEFAULT);
+            String idPath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_IDENTIFY);
+            byte[] licenseByte = getJPGBody(idPath);
+            String identityImg = Base64.encodeToString(licenseByte, Base64.DEFAULT);
+            ArrayList<VisitorComeBean> list = new ArrayList<>();
+            list.add(new VisitorComeBean(schName, carNo, visitTime, visitPhone, deviceId, staffPhone, position, name, identityCard, sex, address, visittype,
+                    visitCardC8, visitCardR8, visitCardC10, visitCardR10, visitorImg, carImg, identityImg));
+            RetrofitHelper.getInstance(mContext).uploadVisitors(list);
+//            String identity = spUtils.getIdentity(mNum);
+//            String licensePath = PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_LICENSE);
+//            int nType = -1;
+//            if (licenseByte.length != 0) {
+//                nType = 0;
+//            } else {
+//                licenseByte = getJPGBody(licensePath);
+//                if (licenseByte.length == 0) {
+//                    licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_CAR_LICENSE));
+//                    if (licenseByte.length != 0) {
+//                        nType = 2;
+//                    } else {
+//                        licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_RESIDENCE));
+//                        if (licenseByte.length != 0) {
+//                            nType = 3;
+//                        } else {
+//                            licenseByte = getJPGBody(PhotoUtils.getPath(context, mNum, PhotoUtils.KEY_PASSPORT));
+//                            if (licenseByte.length != 0) {
+//                                nType = 4;
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    nType = 1;
+//                }
+//            }
+//            Log.i(TAG, "sendVisitor, nType = " + nType);
+//            String phoneNbr = spUtils.getPhoneNbr(mNum);
+//            String address = spUtils.getAddress(mNum);
+//            Log.i(TAG, "sendVisitor, address = " + address + "---len = " + address.length());
+//            String name = spUtils.getName(mNum);
+//            String addTime = spUtils.getAddTime(mNum);
+//            String doorName = spUtils.getDoorName() + "\0";
+//            String cCardno = spUtils.getVisitorCard(mNum);
+//            String clientIP = spUtils.getClientIP();
+//            int sex = spUtils.getSex(mNum);
+//            byte[] visitorBody = getVisitorBody(identity, licenseByte, plateByte, faceByte, phoneNbr, visitorNbr, address, name, addTime, doorName, nType, cCardno, clientIP, sex);
+//            byte[] header = getHeader("zobaotmvisit\0", 368928);
 
-            mSocket = new Socket();
-            Log.i(TAG, " sendVisitor, mIP = " + mIP);
-            SocketAddress sAddress = new InetSocketAddress(mIP, 8100);
-            mSocket.connect(sAddress, 5000);
-            mOutputStream = mSocket.getOutputStream();
-            mInputStream = mSocket.getInputStream();
-            mOutputStream.write(header);
-            Thread.sleep(5);
-            mOutputStream.flush();
-            mOutputStream.write(visitorBody);
-            mOutputStream.flush();
-            byte[] response = new byte[12];
-            int length = mInputStream.read(response);
-            Log.i(TAG, "sendVisitor, response.length: " + length);
-            Thread.sleep(1000);
-            if (length > 0) {
-                EventBus.getDefault().post("success");
-            } else {
-                Thread.sleep(5000);
-                sendVisitor(mReference.get());
-            }
+//            mSocket = new Socket();
+//            Log.i(TAG, " sendVisitor, mIP = " + mIP);
+//            SocketAddress sAddress = new InetSocketAddress(mIP, 8100);
+//            mSocket.connect(sAddress, 5000);
+//            mOutputStream = mSocket.getOutputStream();
+//            mInputStream = mSocket.getInputStream();
+//            mOutputStream.write(header);
+//            Thread.sleep(5);
+//            mOutputStream.flush();
+//            mOutputStream.write(visitorBody);
+//            mOutputStream.flush();
+//            byte[] response = new byte[12];
+//            int length = mInputStream.read(response);
+//            Log.i(TAG, "sendVisitor, response.length: " + length);
+//            Thread.sleep(1000);
+//            if (length > 0) {
+//                EventBus.getDefault().post("success");
+//            } else {
+//                Thread.sleep(5000);
+//                sendVisitor(mReference.get());
+//            }
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
-            sendVisitor(mReference.get());
+            Log.e("Huang, MyTask", Log.getStackTraceString(e));
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e1) {
+//                e1.printStackTrace();
+//            }
+//            sendVisitor(mReference.get());
         } finally {
-            try {
-                mInputStream.close();
-                mOutputStream.close();
-                mSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                mInputStream.close();
+//                mOutputStream.close();
+//                mSocket.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -307,52 +330,68 @@ public class MyTask extends AsyncTask<Integer, Integer, String> {
      */
     private void sendStu(final Context context, final String filePath) {
         try {
-            mIP = new SpUtils(context).getIP();
-            mSocket = new Socket();
-            Log.i(TAG, "sendStu, mIP = " + mIP);
-            SocketAddress address = new InetSocketAddress(mIP, 8100);
-            mSocket.connect(address, 3500);
-            byte[] header = getHeader("zobaotmstudt\0", 194620);
-            byte[] stuByte = getJPGBody(filePath);
             SpUtils spUtils = new SpUtils(context);
-            String doorName = spUtils.getDoorName();
-            String cCardno = spUtils.getStuCard(mNum);
-            String clientIP = spUtils.getClientIP();
-            Log.i(TAG, "sendStu, doorname = " + doorName + "cardno = " + cCardno + "clientIP = " + clientIP);
-            byte[] stuBody = getStuBody(clientIP, doorName, cCardno, stuByte != null ? stuByte.length : 0, stuByte);
-            mOutputStream = mSocket.getOutputStream();
-            mInputStream = mSocket.getInputStream();
-            mOutputStream.write(header);
-            Thread.sleep(5);
-            mOutputStream.write(stuBody);
-            mOutputStream.flush();
-            byte[] response = new byte[12];
-            int length = mInputStream.read(response);
-            Log.i(TAG, "sendStu, response.length : " + length);
-            Thread.sleep(1000);
-            if (length > 0) {
-                EventBus.getDefault().post("" + filePath);
-            } else {
-                //发送学生离校信息失败，重新发送
-                Thread.sleep(5000);
-                sendStu(context, filePath);
-            }
+            String schName = spUtils.getSchool();
+            String leaveTime = formateTime(System.currentTimeMillis());
+            String deviceId = spUtils.getIMEI();
+            String position = spUtils.getDoorName();
+            String visitorCard = spUtils.getVisitorCard(mNum);
+//            String visitorCard = "CD23BA12";
+            String visitCardC8 = Tools.convertCarno(Tools.EIGHT_POSITIVE, visitorCard);
+            String visitCardC10 = Tools.convertCarno(Tools.TEN_POSITIVE, visitorCard);
+            String visitCardR8 = Tools.convertCarno(Tools.EIGHT_REVERSE, visitorCard);
+            String visitCardR10 = Tools.convertCarno(Tools.TEN_REVERSE, visitorCard);
+            byte[] licenseByte = getJPGBody(filePath);
+            String leaveImg = Base64.encodeToString(licenseByte, Base64.DEFAULT);
+            List<StudentLeave> list = new ArrayList<>();
+            list.add(new StudentLeave(schName, leaveTime, deviceId, position, visitCardC8, visitCardR8, visitCardC10, visitCardR10, leaveImg));
+            RetrofitHelper.getInstance(context).uploadStudentsLeave(list);
+//            mIP = new SpUtils(context).getIP();
+//            mSocket = new Socket();
+//            Log.i(TAG, "sendStu, mIP = " + mIP);
+//            SocketAddress address = new InetSocketAddress(mIP, 8100);
+//            mSocket.connect(address, 3500);
+//            byte[] header = getHeader("zobaotmstudt\0", 194620);
+//            byte[] stuByte = getJPGBody(filePath);
+//            SpUtils spUtils = new SpUtils(context);
+//            String doorName = spUtils.getDoorName();
+//            String cCardno = spUtils.getStuCard(mNum);
+//            String clientIP = spUtils.getClientIP();
+//            Log.i(TAG, "sendStu, doorname = " + doorName + "cardno = " + cCardno + "clientIP = " + clientIP);
+//            byte[] stuBody = getStuBody(clientIP, doorName, cCardno, stuByte != null ? stuByte.length : 0, stuByte);
+//            mOutputStream = mSocket.getOutputStream();
+//            mInputStream = mSocket.getInputStream();
+//            mOutputStream.write(header);
+//            Thread.sleep(5);
+//            mOutputStream.write(stuBody);
+//            mOutputStream.flush();
+//            byte[] response = new byte[12];
+//            int length = mInputStream.read(response);
+//            Log.i(TAG, "sendStu, response.length : " + length);
+//            Thread.sleep(1000);
+//            if (length > 0) {
+//                EventBus.getDefault().post("" + filePath);
+//            } else {
+//                //发送学生离校信息失败，重新发送
+//                Thread.sleep(5000);
+//                sendStu(context, filePath);
+//            }
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
-            sendStu(context, filePath);
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e1) {
+//                e1.printStackTrace();
+//            }
+//            sendStu(context, filePath);
         } finally {
-            try {
-                mInputStream.close();
-                mOutputStream.close();
-                mSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                mInputStream.close();
+//                mOutputStream.close();
+//                mSocket.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -364,142 +403,67 @@ public class MyTask extends AsyncTask<Integer, Integer, String> {
      */
     private void sendVisitorLeave(final Context context, final String filePath) {
         try {
-            mIP = new SpUtils(mReference.get()).getIP();
-            mSocket = new Socket();
-            Log.i(TAG, "sendVisitorLeave, mIP" + mIP);
-            SocketAddress address = new InetSocketAddress(mIP, 8100);
-            mSocket.connect(address, 5000);
-            byte[] header = getHeader("zobaotmleave\0", 194620);
-            byte[] stuByte = getJPGBody(filePath);
             SpUtils spUtils = new SpUtils(context);
-            String doorName = spUtils.getDoorName();
-            String cCardno = spUtils.getVisitorCard(mNum);
-            String clientIP = spUtils.getClientIP();
-            Log.i(TAG, "sendVisitorLeave, doorname = " + doorName + "cardno = " + cCardno + "clientIP = " + clientIP);
-            byte[] stuBody = getStuBody(clientIP, doorName, cCardno, stuByte != null ? stuByte.length : 0, stuByte);
-            mOutputStream = mSocket.getOutputStream();
-            mInputStream = mSocket.getInputStream();
-            mOutputStream.write(header);
-            Thread.sleep(5);
-            mOutputStream.write(stuBody);
-            mOutputStream.flush();
-            byte[] response = new byte[12];
-            int length = mInputStream.read(response);
-            Log.i(TAG, "sendVisitorLeave, response.length: " + length);
-            Thread.sleep(1000);
-            if (length > 0) {
-                EventBus.getDefault().post("" + mFilePath);
-            } else {
-                Thread.sleep(5000);
-                sendVisitorLeave(context, filePath);
-            }
+            String schName = spUtils.getSchool();
+            String leaveTime = formateTime(System.currentTimeMillis());
+            String deviceId = spUtils.getIMEI();
+            String position = spUtils.getDoorName();
+            String visitorCard = spUtils.getVisitorCard(mNum);
+//            String visitorCard = "CD23BA12";
+            String visitCardC8 = Tools.convertCarno(Tools.EIGHT_POSITIVE, visitorCard);
+            String visitCardC10 = Tools.convertCarno(Tools.TEN_POSITIVE, visitorCard);
+            String visitCardR8 = Tools.convertCarno(Tools.EIGHT_REVERSE, visitorCard);
+            String visitCardR10 = Tools.convertCarno(Tools.TEN_REVERSE, visitorCard);
+            byte[] licenseByte = getJPGBody(filePath);
+            String leaveImg = Base64.encodeToString(licenseByte, Base64.DEFAULT);
+            List<VisitorsLeave> list = new ArrayList<>();
+            list.add(new VisitorsLeave(schName, leaveTime, deviceId, position, visitCardC8, visitCardR8, visitCardC10, visitCardR10, leaveImg));
+            RetrofitHelper.getInstance(context).uploadVisitorsLeave(list);
+//            mIP = new SpUtils(mReference.get()).getIP();
+//            mSocket = new Socket();
+//            Log.i(TAG, "sendVisitorLeave, mIP" + mIP);
+//            SocketAddress address = new InetSocketAddress(mIP, 8100);
+//            mSocket.connect(address, 5000);
+//            byte[] header = getHeader("zobaotmleave\0", 194620);
+//            byte[] stuByte = getJPGBody(filePath);
+//            SpUtils spUtils = new SpUtils(context);
+//            String doorName = spUtils.getDoorName();
+//            String cCardno = spUtils.getVisitorCard(mNum);
+//            String clientIP = spUtils.getClientIP();
+//            Log.i(TAG, "sendVisitorLeave, doorname = " + doorName + "cardno = " + cCardno + "clientIP = " + clientIP);
+//            byte[] stuBody = getStuBody(clientIP, doorName, cCardno, stuByte != null ? stuByte.length : 0, stuByte);
+//            mOutputStream = mSocket.getOutputStream();
+//            mInputStream = mSocket.getInputStream();
+//            mOutputStream.write(header);
+//            Thread.sleep(5);
+//            mOutputStream.write(stuBody);
+//            mOutputStream.flush();
+//            byte[] response = new byte[12];
+//            int length = mInputStream.read(response);
+//            Log.i(TAG, "sendVisitorLeave, response.length: " + length);
+//            Thread.sleep(1000);
+//            if (length > 0) {
+//                EventBus.getDefault().post("" + mFilePath);
+//            } else {
+//                Thread.sleep(5000);
+//                sendVisitorLeave(context, filePath);
+//            }
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
-            sendVisitorLeave(context, filePath);
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e1) {
+//                e1.printStackTrace();
+//            }
+//            sendVisitorLeave(context, filePath);
         } finally {
-            try {
-                mInputStream.close();
-                mOutputStream.close();
-                mSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * 获取服务器通讯录信息
-     */
-    private void getConnect() {
-        try {
-            mIP = new SpUtils(mReference.get()).getIP();
-            mSocket = new Socket();
-            Log.i(TAG, "getConnect, mIP" + mIP);
-            SocketAddress address = new InetSocketAddress(mIP, 8100);
-            mSocket.connect(address, 5000);
-            byte[] header = getHeader("zobaotmaddrs\0", 0);
-            mOutputStream = mSocket.getOutputStream();
-            mInputStream = mSocket.getInputStream();
-            mOutputStream.write(header);
-            byte[] b = new byte[8];
-            int headerLength = mInputStream.read(b);
-            byte[] contactCountBytes = new byte[4];
-            System.arraycopy(b, 0, contactCountBytes, 0, 4);
-            int contactCount = bytesToInt(contactCountBytes, 0);
-            byte[] contactDataLengthBytes = new byte[4];
-            System.arraycopy(b, 4, contactDataLengthBytes, 0, 4);
-            int contactDataLength = bytesToInt(contactDataLengthBytes, 0);
-            Log.i(TAG, "getConnect, headerLength = " + headerLength);
-            Log.i(TAG, "getConnect, contactCount = " + contactCount);
-            Log.i(TAG, "getConnect, contactDataLength = " + contactDataLength);
-            byte[] contactDataBodyBytes = new byte[1000];
-            int contactDataBodyLength = mInputStream.read(contactDataBodyBytes);
-            while (contactDataBodyLength != contactDataLength) {
-                byte[] bytes = new byte[1000];
-                int supplementContactDataBodyLength = mInputStream.read(bytes);
-                Log.i(TAG, "getConnect, supplementContactDataBodyLength = " + supplementContactDataBodyLength);
-                if (supplementContactDataBodyLength < 1000) {
-                    byte[] bytes1 = new byte[supplementContactDataBodyLength];
-                    System.arraycopy(bytes, 0, bytes1, 0, supplementContactDataBodyLength);
-                    contactDataBodyBytes = addBytes(contactDataBodyBytes, bytes1);
-                } else {
-                    contactDataBodyBytes = addBytes(contactDataBodyBytes, bytes);
-                }
-                contactDataBodyLength = supplementContactDataBodyLength + contactDataBodyLength;
-            }
-            Log.i(TAG, "getConnect, contactDataBodyLength = " + contactDataBodyLength);
-            String contactDataBody = new String(contactDataBodyBytes, "UTF-8");
-            String separator = mContext.getString(R.string.separator);
-            String comma = mContext.getString(R.string.comma);
-            int nameOrNum = 1;
-            Person person = null;
-            List<Person> list = new ArrayList<>();
-            /* 根据,和;分隔符进行数据的解析 */
-            while (contactDataBody.lastIndexOf(comma) != -1) {
-                if (nameOrNum == 1) {
-                    person = new Person();
-                    person.setMPhoto(contactDataBody.substring(contactDataBody.lastIndexOf(comma) + 1, contactDataBody.lastIndexOf(separator)));
-                    Log.i(TAG, "getConnect, Contact.Number = " + contactDataBody.substring(contactDataBody.lastIndexOf(comma) + 1, contactDataBody.lastIndexOf(separator)));
-                    nameOrNum = 0;
-                    contactDataBody = contactDataBody.substring(0, contactDataBody.lastIndexOf(comma) + 1);
-
-                } else if (nameOrNum == 0) {
-                    person.setName(contactDataBody.substring(contactDataBody.lastIndexOf(separator) + 1, contactDataBody.lastIndexOf(comma)));
-                    Log.i(TAG, "getConnect, Contact.Name = " + contactDataBody.substring(contactDataBody.lastIndexOf(separator) + 1, contactDataBody.lastIndexOf(comma)));
-                    contactDataBody = contactDataBody.substring(0, contactDataBody.lastIndexOf(separator) + 1);
-                    nameOrNum = 2;
-                } else {
-                    list.add(person);
-                    nameOrNum = 1;
-                }
-            }
-            list.add(person);
-            Log.i(TAG, "list.size = " + list.size());
-            PersonDaoManager personDaoManager = PersonDaoManager.getInstance(mContext);
-            personDaoManager.deleteAll();
-            personDaoManager.insertContactList(list);
-            EventBus.getDefault().post("contact_success");
-            mOutputStream.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.i(TAG, "getConnect: e = " + e.getMessage());
-            EventBus.getDefault().post("contact_fail");
-        } finally {
-            try {
-                if(mInputStream != null)
-                    mInputStream.close();
-                if(mOutputStream != null)
-                    mOutputStream.close();
-                if(mSocket != null)
-                    mSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                mInputStream.close();
+//                mOutputStream.close();
+//                mSocket.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -664,6 +628,30 @@ public class MyTask extends AsyncTask<Integer, Integer, String> {
             e.printStackTrace();
         }
         return new byte[0];
+    }
+
+    /**
+     * 根据图片路径获取图片的Base64字符集
+     * @param filePath 图片存储路径
+     * @return Base64字符串
+     */
+    private String getJPGBase64String(String filePath){
+        try {
+            FileInputStream fileInputStream = new FileInputStream(new File(filePath));
+            byte[] temp = new byte[1024];
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int len;
+            while ((len = fileInputStream.read(temp)) != -1) {
+                byteArrayOutputStream.write(temp, 0, len);
+            }
+            byteArrayOutputStream.close();
+            fileInputStream.close();
+            byte[] bytes = byteArrayOutputStream.toByteArray();
+           return Base64.encodeToString(bytes,Base64.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Base64.encodeToString(new byte[]{(byte)-1},Base64.DEFAULT);
+        }
     }
 
     /**

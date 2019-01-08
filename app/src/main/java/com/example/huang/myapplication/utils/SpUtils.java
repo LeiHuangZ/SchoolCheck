@@ -204,6 +204,48 @@ public class SpUtils {
         return mPreferences.getString("saveVisitorCard" + num, "");
     }
 
+    /*================================================ 卡号的8位正反序，10位正反序（未采用每次读到之后都转换并存储这些的方式，采用发送卡号前读取上面存取的卡号进行转换）=======================================================*/
+
+    public void putCardNumEightPositive(long num, String cardNum){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString("CardNumEightPositive" + num, cardNum);
+        edit.apply();
+    }
+
+    public void putCardNumTenPositive(long num, String cardNum){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString("CardNumTenPositive" + num, cardNum);
+        edit.apply();
+    }
+
+    public void putCardNumEightReverse(long num, String cardNum){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString("CardNumEightReverse" + num, cardNum);
+        edit.apply();
+    }
+
+    public void putCardNumTenReverse(long num, String cardNum){
+        SharedPreferences.Editor edit = mPreferences.edit();
+        edit.putString("CardNumTenReverse" + num, cardNum);
+        edit.apply();
+    }
+
+    public String getCardNumEightPositive(long num, String cardNum){
+        return mPreferences.getString("CardNumEightPositive" + num, "");
+    }
+
+    public String getCardNumTenPositive(long num, String cardNum){
+        return mPreferences.getString("CardNumTenPositive" + num, "");
+    }
+
+    public String getCardNumEightReverse(long num, String cardNum){
+        return mPreferences.getString("CardNumEightReverse" + num, "");
+    }
+
+    public String getCardNumTenReverse(long num, String cardNum){
+        return mPreferences.getString("CardNumTenReverse" + num, "");
+    }
+
     /**
      * 存储学生证证件号
      *
@@ -345,5 +387,37 @@ public class SpUtils {
 
     public int getVersion(){
         return mSIPreferences.getInt("saveVersion", 65536);
+    }
+
+    /**
+     * 保存上一次通讯录同步时间
+     * @param lastSyncTime 1970-01-01 00:00:00
+     */
+    public void putLastSyncTime(String lastSyncTime){
+        mSIPreferences.edit().putString("LastSyncTime", lastSyncTime).apply();
+    }
+
+    /**
+     * 获取上一次通讯录同步时间
+     * @return 1970-01-01 00:00:00
+     */
+    public String getLastSyncTime(){
+        return mSIPreferences.getString("LastSyncTime", "1970-01-01 00:00:00");
+    }
+
+    /**
+     * 存储设备ID
+     * @param imei 设备IMEI号（更推荐AndroidID）
+     */
+    public void putIMEI(String imei){
+        mSIPreferences.edit().putString("IMEI", imei).apply();
+    }
+
+    /**
+     * 获取设备ID
+     * @return imei
+     */
+    public String getIMEI(){
+        return mSIPreferences.getString("IMEI", "");
     }
 }

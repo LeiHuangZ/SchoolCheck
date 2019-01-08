@@ -40,6 +40,7 @@ public class LicenseActivity extends BaseActivity {
     /**存储图片的KEY，通过判断界面类型，赋予不同的值*/
     private static String KEY;
     private SpUtils mSpUtils;
+    private int mFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +48,22 @@ public class LicenseActivity extends BaseActivity {
         setContentView(R.layout.activity_license);
         ButterKnife.bind(this);
         //获取从上一个界面传入的标签
-        int flag = getIntent().getFlags();
+        mFlag = getIntent().getFlags();
         int passport = 2;
         int carLicense = 3;
 
-        if (flag == passport){
+        if (mFlag == passport){
             mImgTipsLicense.setImageDrawable(getResources().getDrawable(R.drawable.passport));
             title.setText("护照拍照");
             KEY = PhotoUtils.KEY_PASSPORT;
-        }else if (flag == 0){
+        }else if (mFlag == 0){
             title.setText("驾照拍照");
             KEY = PhotoUtils.KEY_LICENSE;
-        }else if (flag == 1){
+        }else if (mFlag == 1){
             mImgTipsLicense.setImageDrawable(getResources().getDrawable(R.drawable.residence));
             title.setText("居住证拍照");
             KEY = PhotoUtils.KEY_RESIDENCE;
-        }else if (flag == carLicense){
+        }else if (mFlag == carLicense){
             title.setText("行驶证拍照");
             KEY = PhotoUtils.KEY_CAR_LICENSE;
         }
@@ -130,22 +131,26 @@ public class LicenseActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //Todo 2018/12/19 测试,正式删除 获取存储身份信息
-        if (mSpUtils == null) {
-            mSpUtils = new SpUtils(this);
-        }
-        String name = mSpUtils.getName(MainActivity.count);
-        int sex = mSpUtils.getSex(MainActivity.count);
-        String address = mSpUtils.getAddress(MainActivity.count);
-        String identity = mSpUtils.getIdentity(MainActivity.count);
-        Log.v("Huang, PlateActivity", "saved name = " + name);
-        Log.v("Huang, PlateActivity", "saved sex = " + sex);
-        Log.v("Huang, PlateActivity", "saved address = " + address);
-        Log.v("Huang, PlateActivity", "saved identity = " + identity);
+//        // 2018/12/19 测试,正式删除 获取存储身份信息
+//        if (mSpUtils == null) {
+//            mSpUtils = new SpUtils(this);
+//        }
+//        String name = mSpUtils.getName(MainActivity.count);
+//        int sex = mSpUtils.getSex(MainActivity.count);
+//        String address = mSpUtils.getAddress(MainActivity.count);
+//        String identity = mSpUtils.getIdentity(MainActivity.count);
+//        Log.v("Huang, PlateActivity", "saved name = " + name);
+//        Log.v("Huang, PlateActivity", "saved sex = " + sex);
+//        Log.v("Huang, PlateActivity", "saved address = " + address);
+//        Log.v("Huang, PlateActivity", "saved identity = " + identity);
         String license = PhotoUtils.getPath(this, MainActivity.count, KEY);
         Bitmap bitmap = BitmapFactory.decodeFile(license);
         if (bitmap == null) {
-            mImgTipsLicense.setImageDrawable(getDrawable(R.drawable.licence));
+            if (mFlag == 1){
+                mImgTipsLicense.setImageDrawable(getDrawable(R.drawable.residence));
+            } else {
+                mImgTipsLicense.setImageDrawable(getDrawable(R.drawable.licence));
+            }
             Toast.makeText(this, "取消了拍照", Toast.LENGTH_SHORT).show();
             return;
         }

@@ -104,7 +104,9 @@ public class RespondentsActivity extends BaseActivity {
                 break;
             case R.id.btn_respondents_skip:
                 mSpUtils.clearPhoneNbr(MainActivity.count);
-                Intent intent = new Intent(this, VisitorCardActivity.class);
+//                Intent intent = new Intent(this, VisitorCardActivity.class);
+                // TODO 正式发布时改回上面的
+                Intent intent = new Intent(this, VisitorCardActivityBak.class);
                 startActivity(intent);
                 break;
             //拨打受访人电话，并记录受访人电话
@@ -129,7 +131,10 @@ public class RespondentsActivity extends BaseActivity {
             case R.id.btn_respondents_next:
                 if (mEdtRespondentsNum.getText().length() > 0 && mEdtRespondentsNum.getText().length() <= 11) {
                     mSpUtils.savePhoneNbr(MainActivity.count, mEdtRespondentsNum.getText().toString());
-                    startActivity(new Intent(this, VisitorCardActivity.class));
+//                Intent intent2 = new Intent(this, VisitorCardActivity.class);
+                    // TODO 正式发布时改回上面的
+                    Intent intent2 = new Intent(this, VisitorCardActivityBak.class);
+                    startActivity(intent2);
                 } else{
                     Toast.makeText(this, "请输入正确的电话号码", Toast.LENGTH_SHORT).show();
                 }

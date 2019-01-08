@@ -10,6 +10,8 @@ import com.zsy.words.utils.PinYinUtils;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.NotNull;
 
 @Entity
 public class Person {
@@ -20,6 +22,8 @@ public class Person {
     //拼音首字母
     private String headerWord;
     //photo_number
+    @Id
+    @NotNull
     private String mPhoto;
     public Person(String name){
         this.name = name;
@@ -34,8 +38,9 @@ public class Person {
         headerWord = pinyin.substring(0, 1);
     }
 
-    @Generated(hash = 980908431)
-    public Person(String name, String pinyin, String headerWord, String mPhoto) {
+    @Generated(hash = 393937833)
+    public Person(String name, String pinyin, String headerWord,
+            @NotNull String mPhoto) {
         this.name = name;
         this.pinyin = pinyin;
         this.headerWord = headerWord;

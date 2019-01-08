@@ -108,12 +108,11 @@ public class PlateActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //Todo 2018/12/19 测试,正式删除 获取存储的车牌号
-        if (mSpUtils == null) {
-            mSpUtils = new SpUtils(this);
-        }
-        String plateNum = mSpUtils.getPlateNum(MainActivity.count);
-        Log.v("Huang, PlateActivity", "saved plateNum = " + plateNum);
+//        if (mSpUtils == null) {
+//            mSpUtils = new SpUtils(this);
+//        }
+//        String plateNum = mSpUtils.getPlateNum(MainActivity.count);
+//        Log.v("Huang, PlateActivity", "saved plateNum = " + plateNum);
         String licensePlate = PhotoUtils.getPath(this, MainActivity.count, PhotoUtils.KEY_PLATE);
         final Bitmap bitmap = BitmapFactory.decodeFile(licensePlate);
         if (bitmap == null) {

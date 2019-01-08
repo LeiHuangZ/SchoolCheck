@@ -3,10 +3,7 @@ package com.example.huang.myapplication.certificate;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.example.huang.myapplication.BaseActivity;
 import com.example.huang.myapplication.DrawableTextView;

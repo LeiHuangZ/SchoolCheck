@@ -74,6 +74,9 @@ public class EndActivity extends BaseActivity {
                 //mProgressDialog.show();
                 int visitorLeave = 2;
                 if (flag == 0) {
+                    /*
+                     * 上传访客来访记录
+                     */
                     MyTask task = new MyTask(EndActivity.this.getApplicationContext());
                     MainActivity.mList.add(task);
                     task.execute(0);

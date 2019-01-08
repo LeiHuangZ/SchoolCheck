@@ -6,6 +6,8 @@ import com.zsy.words.bean.DaoSession;
 import com.zsy.words.bean.Person;
 import com.zsy.words.bean.PersonDao;
 
+import org.greenrobot.greendao.query.QueryBuilder;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 

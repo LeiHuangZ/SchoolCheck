@@ -3,6 +3,8 @@
     package="com.example.huang.myapplication">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -28,6 +30,7 @@
     <!-- 开启NFC权限 -->
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".MyApplication"
@@ -43,6 +46,47 @@
         <activity
             android:name=".main.MainActivity"
             android:launchMode="singleTask">
+        </activity>
+        <activity android:name=".plate.PlateActivity" />
+        <activity android:name=".certificate.CertificateActivity" />
+        <activity
+            android:name=".certificate.identification.handheld.instance.IDReadActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity android:name=".plate.RectPhoto" />
+        <!-- 驾驶和护照拍照界面 -->
+        <activity
+            android:name=".certificate.LicenseRectPhoto"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity android:name=".certificate.LicenseActivity" />
+        <activity android:name=".student.StuIDActivity" />
+        <activity android:name=".student.StuIDActivityBak" />
+        <activity android:name=".visitor.VisitorActivity" />
+        <activity android:name=".respondents.RespondentsActivity" />
+        <activity android:name=".end.EndActivity" />
+        <activity android:name=".student.FaceActivity" />
+        <activity android:name=".respondents.VisitorCardActivity" />
+        <activity android:name=".respondents.VisitorCardActivityBak" />
+        <activity android:name=".leave.VisitorFaceActivity" />
+        <activity android:name=".respondents.VisitorFaceTakeActivity" />
+        <activity android:name=".leave.VisitorIDActivity" />
+        <activity android:name=".leave.VisitorIDActivityBak" />
+        <activity
+            android:name=".system.SettingActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden|stateAlwaysHidden" />
+
+        <service android:name=".MyService" />
+
+        <activity android:name="com.zsy.words.ConnectActivity" />
+        <activity android:name=".system.CustomActivity" />
+
+        <!-- 测试用Activity -->
+        <activity
+            android:name=".main.TestActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity android:name=".certificate.OtherActivity" />
+        <activity android:name=".main.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -56,42 +100,6 @@
                 <!-- <data android:host="main_activity" android:scheme="com.android.example"/> -->
             </intent-filter>
         </activity>
-        <activity android:name=".plate.PlateActivity" />
-        <activity android:name=".certificate.CertificateActivity" />
-        <activity
-            android:name=".certificate.identification.handheld.instance.IDReadActivity"
-            android:theme="@style/AppTheme.Main"></activity>
-        <activity android:name=".plate.RectPhoto" />
-        <!-- 驾驶和护照拍照界面 -->
-        <activity
-            android:name=".certificate.LicenseRectPhoto"
-            android:configChanges="orientation|keyboardHidden" />
-        <activity android:name=".certificate.LicenseActivity" />
-        <activity android:name=".student.StuIDActivity" />
-        <activity android:name=".visitor.VisitorActivity" />
-        <activity android:name=".respondents.RespondentsActivity"></activity>
-        <activity android:name=".end.EndActivity" />
-        <activity android:name=".student.FaceActivity" />
-        <activity android:name=".respondents.VisitorCardActivity"></activity>
-        <activity android:name=".leave.VisitorFaceActivity" />
-        <activity android:name=".respondents.VisitorFaceTakeActivity"></activity>
-        <activity android:name=".leave.VisitorIDActivity" />
-        <activity
-            android:name=".system.SettingActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden|stateAlwaysHidden" />
-
-        <service android:name=".MyService" />
-
-        <activity android:name="com.zsy.words.ConnectActivity"></activity>
-        <activity android:name=".system.CustomActivity"></activity>
-
-        <!-- 测试用Activity -->
-        <activity
-            android:name=".main.TestActivity"
-            android:theme="@style/AppTheme.Main"></activity>
-        <activity android:name=".certificate.OtherActivity"></activity>
     </application>
 
 </manifest>

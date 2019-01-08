@@ -1,6 +1,6 @@
 package com.example.huang.myapplication.retrofit;
 
-public class Attendance {
+public class VisitorComeBean {
 
     /**
      * schName : String
@@ -43,6 +43,33 @@ public class Attendance {
     private String visitorImg;
     private String carImg;
     private String identityImg;
+
+    public VisitorComeBean() {
+    }
+
+    public VisitorComeBean(String schName, String carNo, String visitTime, String visitPhone, String deviceId, String staffPhone, String position,
+                           String name, String identityCard, String sex, String address, String visittype,
+                           String visitCardC8, String visitCardR8, String visitCardC10, String visitCardR10, String visitorImg, String carImg, String identityImg) {
+        this.schName = schName;
+        this.carNo = carNo;
+        this.visitTime = visitTime;
+        this.visitPhone = visitPhone;
+        this.deviceId = deviceId;
+        this.staffPhone = staffPhone;
+        this.position = position;
+        this.name = name;
+        this.identityCard = identityCard;
+        this.sex = sex;
+        this.address = address;
+        this.visittype = visittype;
+        this.visitCardC8 = visitCardC8;
+        this.visitCardR8 = visitCardR8;
+        this.visitCardC10 = visitCardC10;
+        this.visitCardR10 = visitCardR10;
+        this.visitorImg = visitorImg;
+        this.carImg = carImg;
+        this.identityImg = identityImg;
+    }
 
     public String getVisitPhone() {
         return visitPhone;

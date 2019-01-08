@@ -1,5 +1,8 @@
 package com.example.huang.myapplication.main;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -8,6 +11,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,6 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.AccessToken;
 import com.example.huang.myapplication.BaseActivity;
 import com.example.huang.myapplication.R;
 import com.example.huang.myapplication.certificate.CertificateActivity;
@@ -69,6 +78,8 @@ public class MainActivity extends BaseActivity {
     FloatingActionButton mMainBtnRefresh;
     private SpUtils mSpUtils;
 
+    private boolean mIsInitSuccess = false;
+
     /**
      * 任务列表
      */
@@ -85,8 +96,13 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         mSpUtils = new SpUtils(this);
         mUiSpUtils = new UiSpUtils(MainActivity.this);
+
+        //获取IMEI
+        String imei = getImei();
+        mSpUtils.putIMEI(imei);
         //保证WiFi的开启状态
         WifiControl.getInstance(this).openWifi();
 
@@ -99,28 +115,15 @@ public class MainActivity extends BaseActivity {
         //EventBus注册
         EventBus.getDefault().register(this);
 
-        //判断是否设置了IP地址，没有设置，则开启设置界面
-        String ip = mSpUtils.getIP();
-        if ("".equals(ip)) {
-            startActivity(new Intent(MainActivity.this, SettingActivity.class));
-            return;
-        }
-
         //同步通讯录
-//        MyTask myTask = new MyTask(this);
-//        myTask.execute(5);
-        mMainBtnRefresh.setEnabled(false);
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                EventBus.getDefault().post("12345");
-            }
-        });
+        onViewClicked(mMainBtnRefresh);
+
+        //判断是否设置了IP地址，没有设置，则开启设置界面
+        // TODO: 2018/12/28 判断IP信息，记得开启
+//        String ip = mSpUtils.getIP();
+//        if ("".equals(ip)) {
+//            startActivity(new Intent(MainActivity.this, SettingActivity.class));
+//        }
     }
 
     private void initView() {
@@ -198,6 +201,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (!mIsInitSuccess) {
+            initAccessTokenWithAkSk();
+        }
         if (!mSpUtils.getIP().equals("")) {
             //开启心跳
             SocketClientUtils.getInstance("192.168.1.154").changeFlag(true);
@@ -259,42 +265,13 @@ public class MainActivity extends BaseActivity {
             case R.id.student:
                 count++;
                 startActivity(new Intent(this, FaceActivity.class));
-//                startActivity(new Intent(this, Camera2TestActivity.class));
                 break;
             case R.id.visitor_leave:
                 count++;
                 startActivity(new Intent(this, VisitorFaceActivity.class));
                 break;
             case R.id.main_btn_refresh:
-                //同步通讯录
-//                MyTask myTask = new MyTask(this);
-//                myTask.execute(5);
-                //TODO 2018/12/19 更新通讯录，更新UI
-                RetrofitHelper.getInstance().queryTeachers("", 30, "杭州校区", new ArrayList<String>(), 1, "2018-01-16 15:31:27",
-                        new RetrofitHelper.RetrofitListener() {
-                    @Override
-                    public void onResponse() {
-
-                    }
-
-                    @Override
-                    public void onFailure() {
-
-                    }
-                });
-                Log.i(TAG, "onViewClicked: ");
-                mMainBtnRefresh.setEnabled(false);
-//                mExecutorService.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            Thread.sleep(3000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        EventBus.getDefault().post("12345");
-//                    }
-//                });
+                queryTeachers();
                 break;
             case R.id.custom_ui:
                 startActivity(new Intent(MainActivity.this,CustomActivity.class));
@@ -306,6 +283,10 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onStop() {
+        if (mRetryDialog!=null) {
+            mRetryDialog.cancel();
+            mRetryDialog = null;
+        }
         //停止本次心跳
         SocketClientUtils.getInstance("192.168.1.154").changeFlag(false);
         Log.i(TAG, "onStop: ");
@@ -317,6 +298,37 @@ public class MainActivity extends BaseActivity {
         EventBus.getDefault().unregister(this);
         super.onDestroy();
 
+    }
+
+    /**
+     * 获取设备IMEI
+     * @return 设备IMEI
+     */
+    private String getImei(){
+        //实例化TelephonyManager对象
+        TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+        //获取IMEI号
+        @SuppressLint({"MissingPermission", "HardwareIds"}) String imei = telephonyManager != null ? telephonyManager.getDeviceId() : null;
+        //在次做个验证，也不是什么时候都能获取到的啊
+        if (imei == null) {
+            imei = "";
+        }
+        return imei;
+    }
+
+    /**
+     * 获取通讯录
+     */
+    private void queryTeachers(){
+        // 获取存储的上一次通讯录同步时间（因接口未提供唯一标识，无法进行本地数据库更新，暂时固定为"1970-01-01 00:00:00"）
+        String lastSyncTime = mSpUtils.getLastSyncTime();
+        // 获取配置的学校名称
+        String school = mSpUtils.getSchool();
+        // 更新进行时，更新按钮不可点击
+        mMainBtnRefresh.setEnabled(false);
+        // 请求获取通讯录
+        // TODO: 2018/12/26 每页获取的数量
+        RetrofitHelper.getInstance(MainActivity.this).queryTeachers(false, "", 500, school, new ArrayList<String>(), 1, lastSyncTime);
     }
 
     @Override
@@ -352,5 +364,51 @@ public class MainActivity extends BaseActivity {
                 | ((src[offset + 2] & 0xFF) << 16)
                 | ((src[offset + 3] & 0xFF) << 24));
         return value;
+    }
+
+    /**
+     * 用明文ak，sk初始化百度识别SDK
+     */
+    private void initAccessTokenWithAkSk() {
+        OCR.getInstance(this).initAccessTokenWithAkSk(new OnResultListener<AccessToken>() {
+            @Override
+            public void onResult(AccessToken result) {
+                String token = result.getAccessToken();
+                Log.v("Huang, MyApplication", "token =" + token);
+                mIsInitSuccess = true;
+            }
+
+            @Override
+            public void onError(OCRError error) {
+                error.printStackTrace();
+                Log.i("Huang, MyApplication", "初始化SDK失败\n" + Log.getStackTraceString(error));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showRetryDialog();
+                    }
+                });
+                mIsInitSuccess = false;
+            }
+        }, getApplicationContext(),  "cAG2gXd2C2Ay1lm7b7ji0q4o", "MsSs9yvmajotum7Gw1w4CnHO8Xjm431P");
+    }
+
+    /**
+     * 提醒用户SDK初始化失败，检查网络和时间设置
+     */
+    private AlertDialog mRetryDialog;
+    private void showRetryDialog() {
+        if (mRetryDialog == null) {
+            mRetryDialog = new AlertDialog.Builder(this)
+                    .setMessage("识别SDK初始化失败，请检查网络和时间后重试")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                        }
+                    })
+                    .create();
+        }
+        mRetryDialog.show();
     }
 }

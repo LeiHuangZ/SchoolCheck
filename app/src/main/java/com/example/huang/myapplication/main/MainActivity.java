@@ -120,10 +120,10 @@ public class MainActivity extends BaseActivity {
 
         //判断是否设置了IP地址，没有设置，则开启设置界面
         // TODO: 2018/12/28 判断IP信息，记得开启
-//        String ip = mSpUtils.getIP();
-//        if ("".equals(ip)) {
-//            startActivity(new Intent(MainActivity.this, SettingActivity.class));
-//        }
+        String ip = mSpUtils.getIP();
+        if ("".equals(ip)) {
+            startActivity(new Intent(MainActivity.this, SettingActivity.class));
+        }
     }
 
     private void initView() {
@@ -328,13 +328,13 @@ public class MainActivity extends BaseActivity {
         mMainBtnRefresh.setEnabled(false);
         // 请求获取通讯录
         // TODO: 2018/12/26 每页获取的数量
-        RetrofitHelper.getInstance(MainActivity.this).queryTeachers(false, "", 500, school, new ArrayList<String>(), 1, lastSyncTime);
+        RetrofitHelper.getInstance(MainActivity.this).queryTeachers(false, "", 1000, school, new ArrayList<String>(), 1, lastSyncTime);
     }
 
     @Override
     public void onBackPressed() {
         // TODO 2018/12/19 正式发布版本时，删除以屏蔽返回键
-        super.onBackPressed();
+//        super.onBackPressed();
     }
 
     private int versionNameToInt(String versionName) {

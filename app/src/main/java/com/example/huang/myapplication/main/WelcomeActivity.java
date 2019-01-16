@@ -60,6 +60,9 @@ public class WelcomeActivity extends AppCompatActivity {
         //6.0才用动态权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !mIsRequesting) {
             initPermission();
+        } else {
+            startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
+            finish();
         }
     }
 

@@ -108,9 +108,9 @@ public class VisitorFaceActivity extends Activity implements SurfaceHolder.Callb
         mBtnFaceNext.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivity(new Intent(VisitorFaceActivity.this, VisitorIDActivity.class));
-                // adb TODO: 2018/12/26 测试使用NFC，正式使用另外一个不知道什么模块
-                startActivity(new Intent(VisitorFaceActivity.this, VisitorIDActivityBak.class));
+                startActivity(new Intent(VisitorFaceActivity.this, VisitorIDActivity.class));
+                // TODO: 2018/12/26 测试使用NFC，正式使用另外一个不知道什么模块
+//                startActivity(new Intent(VisitorFaceActivity.this, VisitorIDActivityBak.class));
             }
         });
 

@@ -107,9 +107,9 @@ public class FaceActivity extends Activity implements SurfaceHolder.Callback {
         mBtnFaceNext.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivity(new Intent(FaceActivity.this, StuIDActivity.class));
+                startActivity(new Intent(FaceActivity.this, StuIDActivity.class));
                 // TODO: 2018/12/26 测试使用NFC，正式使用另外一个不知道什么模块
-                startActivity(new Intent(FaceActivity.this, StuIDActivityBak.class));
+//                startActivity(new Intent(FaceActivity.this, StuIDActivityBak.class));
             }
         });
 

@@ -6,12 +6,22 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * @author huang 3004240957@qq.com
  */
 public interface RetrofitInterface {
+    /**
+     * 检查设备鉴权
+     * @param imei 设备ID
+     * @return 检查设备鉴权的Call对象，用作异步或同步调用请求
+     */
+    @GET("index.php")
+    Call<ResponseBody> authDeviceInter(@Query("route") String str, @Query("imei") String imei);
+
     /**
      * 获取教师通讯录信息
      * @param loginName 登陆名 暂时传""

@@ -420,4 +420,30 @@ public class SpUtils {
     public String getIMEI(){
         return mSIPreferences.getString("IMEI", "");
     }
+
+    /**
+     * 存储初次启动时间
+     */
+    public void putInitTime(long time){
+        mSIPreferences.edit().putLong("InitTime", time).apply();
+    }
+    /**
+     * 获取初次启动时间
+     */
+    public long getInitTime(){
+        return mSIPreferences.getLong("InitTime", 0);
+    }
+
+    /**
+     * 存储鉴权
+     */
+    public void putAuth(boolean success){
+        mSIPreferences.edit().putBoolean("AuthInfo", success).apply();
+    }
+    /**
+     * 获取鉴权
+     */
+    public boolean getAuth(){
+        return mSIPreferences.getBoolean("AuthInfo", false);
+    }
 }

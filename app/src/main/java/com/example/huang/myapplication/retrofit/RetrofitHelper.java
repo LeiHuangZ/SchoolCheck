@@ -70,6 +70,52 @@ public class RetrofitHelper {
         return sRetrofitHelper;
     }
 
+    public static void quthDevice(final String imei){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://interface.zobao.net/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RetrofitInterface anInterface = retrofit.create(RetrofitInterface.class);
+        Call<ResponseBody> call = anInterface.authDeviceInter("common/visitterminal", imei);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody body = response.body();
+                try {
+                    String string = body != null ? body.string() : null;
+                    if (string == null){
+                        EventBus.getDefault().post("authFailed");
+                    } else {
+                        JSONObject jsonObject = new JSONObject(string);
+                        String result = jsonObject.getString("result");
+                        if (result.equals("success")){
+                            String ak = jsonObject.getString("ak");
+                            String sk = jsonObject.getString("sk");
+                            EventBus.getDefault().post("authSuccess");
+                        } else {
+                            EventBus.getDefault().post("authFailed");
+                        }
+                    }
+                    Log.i("Huang, RetrofitHelper", "quthDevice body = " + string);
+                } catch (Exception e) {
+                    Log.e("Huang, RetrofitHelper", Log.getStackTraceString(e));
+                    EventBus.getDefault().post("authFailed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("Huang, RetrofitHelper", Log.getStackTraceString(t));
+                EventBus.getDefault().post("authFailed");
+            }
+        });
+    }
+
+    public interface authListener{
+        void authSuccess(String ak, String sk);
+        void authFail();
+    }
+
     /**
      * 获取通讯录
      * @param isRepeat 是否是在一次请求中的再次获取（因为每一页记录数量的设置关系，可能会有下一页数据，此时需要再次请求获取下一页数据）
@@ -150,7 +196,7 @@ public class RetrofitHelper {
                 String resultMessage = serverResult.getResultMessage();
                 String internalMessage = serverResult.getInternalMessage();
                 EventBus.getDefault().post("success");
-                saveUploadLog("访客来访数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
+                //saveUploadLog("访客来访数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
             }
 
             @Override
@@ -186,7 +232,7 @@ public class RetrofitHelper {
                 String resultMessage = serverResult.getResultMessage();
                 String internalMessage = serverResult.getInternalMessage();
                 EventBus.getDefault().post("success");
-                saveUploadLog("访客离开数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
+//                saveUploadLog("访客离开数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
             }
 
             @Override
@@ -224,7 +270,7 @@ public class RetrofitHelper {
                 String internalMessage = serverResult.getInternalMessage();
                 Log.i("Huang, RetrofitHelper", "uploadStudentsLeave response = " + response);
                 EventBus.getDefault().post("success");
-                saveUploadLog("学生离校数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
+//                saveUploadLog("学生离校数据上传", formateTime(System.currentTimeMillis()), "resultCode = " + resultCode + ", resultMessage = " + resultMessage + ", internalMessage = " + internalMessage);
             }
 
             @Override

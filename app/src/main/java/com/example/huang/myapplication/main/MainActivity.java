@@ -9,12 +9,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,13 +43,17 @@ import com.example.huang.myapplication.utils.SpUtils;
 import com.example.huang.myapplication.utils.UiSpUtils;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +83,14 @@ public class MainActivity extends BaseActivity {
     TextView mUpdateCount;
     @BindView(R.id.main_btn_refresh)
     FloatingActionButton mMainBtnRefresh;
+    @BindView(R.id.visitor)
+    Button mVisitor;
+    @BindView(R.id.visitor_leave)
+    Button mVisitorLeave;
+    @BindView(R.id.student)
+    Button mStudent;
+    @BindView(R.id.custom_ui)
+    ImageView mCustomUi;
     private SpUtils mSpUtils;
 
     private boolean mIsInitSuccess = false;
@@ -97,12 +112,16 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        mStudent.setEnabled(false);
+        mVisitor.setEnabled(false);
+        mVisitorLeave.setEnabled(false);
+        mMainBtnRefresh.setEnabled(false);
+        mCustomUi.setEnabled(false);
+
+
         mSpUtils = new SpUtils(this);
         mUiSpUtils = new UiSpUtils(MainActivity.this);
 
-        //获取IMEI
-        String imei = getImei();
-        mSpUtils.putIMEI(imei);
         //保证WiFi的开启状态
         WifiControl.getInstance(this).openWifi();
 
@@ -115,8 +134,14 @@ public class MainActivity extends BaseActivity {
         //EventBus注册
         EventBus.getDefault().register(this);
 
-        //同步通讯录
-        onViewClicked(mMainBtnRefresh);
+
+        /*
+         * 检查鉴权状态
+         */
+        boolean auth = mSpUtils.getAuth();
+        if (!auth) {
+            return;
+        }
 
         //判断是否设置了IP地址，没有设置，则开启设置界面
         // TODO: 2018/12/28 判断IP信息，记得开启
@@ -124,6 +149,13 @@ public class MainActivity extends BaseActivity {
         if ("".equals(ip)) {
             startActivity(new Intent(MainActivity.this, SettingActivity.class));
         }
+        //同步通讯录
+        onViewClicked(mMainBtnRefresh);
+        mStudent.setEnabled(true);
+        mVisitor.setEnabled(true);
+        mVisitorLeave.setEnabled(true);
+        mMainBtnRefresh.setEnabled(true);
+        mCustomUi.setEnabled(true);
     }
 
     private void initView() {
@@ -156,6 +188,7 @@ public class MainActivity extends BaseActivity {
         Log.i(TAG, "onDataSynEvent: " + connectState);
         if (disconnect.equals(connectState)) {
             this.connectState.setImageResource(R.drawable.disconnect);
+            this.mConnectDisconnect.setText(R.string.state_disconnect);
             this.mConnectDisconnect.setVisibility(View.VISIBLE);
         } else if (connect.equals(connectState)) {
             this.connectState.setImageResource(R.drawable.connect);
@@ -181,6 +214,60 @@ public class MainActivity extends BaseActivity {
             startActivity(intent);
         } else if ("12345".equals(connectState)) {
             mMainBtnRefresh.setEnabled(true);
+        } else if (connectState.equals("authFailed")) {
+            this.connectState.setImageResource(R.drawable.disconnect);
+            this.mConnectDisconnect.setText("设备未鉴权，请联系管理 " + getImei());
+            this.mConnectDisconnect.setVisibility(View.VISIBLE);
+            mSpUtils.putAuth(false);
+        } else if (connectState.equals("authSuccess")) {
+            this.connectState.setImageResource(R.drawable.connect);
+            this.mConnectDisconnect.setText("已连接");
+            this.mConnectDisconnect.setVisibility(View.VISIBLE);
+            mSpUtils.putAuth(true);
+            mExecutorService.shutdown();
+            if (!mIsInitSuccess) {
+                initAccessTokenWithAkSk();
+            }
+            if (!mSpUtils.getIP().equals("")) {
+                //开启心跳
+                SocketClientUtils.getInstance("192.168.1.154").changeFlag(true);
+                SocketClientUtils socketClientUtils = SocketClientUtils.getInstance(new SpUtils(this).getIP());
+                socketClientUtils.heartBeat();
+
+                //检测本地存储的服务器最新版本和APP版本是否相对应
+                int serverVersion = mSpUtils.getVersion();
+                /* 获取本地版本号并转换为int */
+                PackageManager manager = getPackageManager();
+                PackageInfo info;
+                try {
+                    info = manager.getPackageInfo(MainActivity.this.getPackageName(), 0);
+                    String versionName = info.versionName;
+                    int versionNameToInt = versionNameToInt(versionName);
+                    Log.i(TAG, "sendUpdate, localVersion = " + versionNameToInt);
+                    Log.i(TAG, "sendUpdate, savedServerVersion = " + serverVersion);
+                    if (serverVersion != versionNameToInt) {
+                        //获取升级
+                        MyTask myTask1 = new MyTask(this);
+                        myTask1.execute(3);
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            initView();
+            if (mList.size() == 0) {
+                PhotoUtils.deleteDirectory(MainActivity.this, "/storage/sdcard0/tempPhoto/");
+                mSpUtils.clearAll();
+                count = 0;
+            }
+            //刷新显示学校信息
+            schoolName.setText(mSpUtils.getSchool());
+            onViewClicked(mMainBtnRefresh);
+            mStudent.setEnabled(true);
+            mVisitor.setEnabled(true);
+            mVisitorLeave.setEnabled(true);
+            mMainBtnRefresh.setEnabled(true);
+            mCustomUi.setEnabled(true);
         } else {
             Log.i(TAG, "mList.size(): " + mList.size());
             if (mList.size() == 0) {
@@ -201,6 +288,15 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        /*
+         * 检查鉴权状态
+         */
+        boolean auth = mSpUtils.getAuth();
+        if (!auth) {
+            initAuthTask();
+            return;
+        }
+
         if (!mIsInitSuccess) {
             initAccessTokenWithAkSk();
         }
@@ -257,7 +353,7 @@ public class MainActivity extends BaseActivity {
                     startActivity(new Intent(MainActivity.this, CertificateActivity.class));
                 } else {
                     // TODO: 2018/1/12 判断配置的界面标记，启动相对应的界面
-                    if (mUiSpUtils.getSign(UiSpUtils.SIGN_VISITOR, UiSpUtils.KEY_ID)){
+                    if (mUiSpUtils.getSign(UiSpUtils.SIGN_VISITOR, UiSpUtils.KEY_ID)) {
 
                     }
                 }
@@ -274,7 +370,7 @@ public class MainActivity extends BaseActivity {
                 queryTeachers();
                 break;
             case R.id.custom_ui:
-                startActivity(new Intent(MainActivity.this,CustomActivity.class));
+                startActivity(new Intent(MainActivity.this, CustomActivity.class));
                 break;
             default:
                 break;
@@ -283,7 +379,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onStop() {
-        if (mRetryDialog!=null) {
+        if (mRetryDialog != null) {
             mRetryDialog.cancel();
             mRetryDialog = null;
         }
@@ -296,15 +392,21 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         EventBus.getDefault().unregister(this);
+        if (mTimeoutDialog != null) {
+            mExecutorService.shutdownNow();
+            mTimeoutDialog.cancel();
+            mTimeoutDialog = null;
+        }
         super.onDestroy();
 
     }
 
     /**
      * 获取设备IMEI
+     *
      * @return 设备IMEI
      */
-    private String getImei(){
+    private String getImei() {
         //实例化TelephonyManager对象
         TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         //获取IMEI号
@@ -319,7 +421,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 获取通讯录
      */
-    private void queryTeachers(){
+    private void queryTeachers() {
         // 获取存储的上一次通讯录同步时间（因接口未提供唯一标识，无法进行本地数据库更新，暂时固定为"1970-01-01 00:00:00"）
         String lastSyncTime = mSpUtils.getLastSyncTime();
         // 获取配置的学校名称
@@ -376,6 +478,8 @@ public class MainActivity extends BaseActivity {
                 String token = result.getAccessToken();
                 Log.v("Huang, MyApplication", "token =" + token);
                 mIsInitSuccess = true;
+                //时间正确，开始计时
+//                initTimer();
             }
 
             @Override
@@ -390,13 +494,14 @@ public class MainActivity extends BaseActivity {
                 });
                 mIsInitSuccess = false;
             }
-        }, getApplicationContext(),  "cAG2gXd2C2Ay1lm7b7ji0q4o", "MsSs9yvmajotum7Gw1w4CnHO8Xjm431P");
+        }, getApplicationContext(), "cAG2gXd2C2Ay1lm7b7ji0q4o", "MsSs9yvmajotum7Gw1w4CnHO8Xjm431P");
     }
 
     /**
      * 提醒用户SDK初始化失败，检查网络和时间设置
      */
     private AlertDialog mRetryDialog;
+
     private void showRetryDialog() {
         if (mRetryDialog == null) {
             mRetryDialog = new AlertDialog.Builder(this)
@@ -407,8 +512,110 @@ public class MainActivity extends BaseActivity {
                             startActivity(new Intent(MainActivity.this, SettingActivity.class));
                         }
                     })
+                    .setCancelable(false)
                     .create();
         }
         mRetryDialog.show();
     }
+
+    /**
+     * 定时获取系统时间
+     */
+    ThreadFactory threadFactory = Executors.defaultThreadFactory();
+    ScheduledExecutorService mExecutorService = new ScheduledThreadPoolExecutor(1, threadFactory, new ThreadPoolExecutor.AbortPolicy());
+
+    private void initTimer() {
+        mExecutorService.scheduleWithFixedDelay(task, 0, 2000, TimeUnit.MILLISECONDS);
+    }
+
+    private HandlerTimer mHandlerTimer = new HandlerTimer(this);
+
+    private static class HandlerTimer extends Handler {
+        private WeakReference<MainActivity> mReference;
+
+        HandlerTimer(MainActivity activity) {
+            mReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity mainActivity = mReference.get();
+            switch (msg.what) {
+                case 1:
+                    mainActivity.timerHandeViewMethod();
+                    break;
+                default:
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    }
+
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 1;
+            mHandlerTimer.sendMessage(message);
+        }
+    };
+
+    private long maxTime = 15811200000L;
+
+    public void timerHandeViewMethod() {
+        long currentTime = System.currentTimeMillis();
+        long initTime = mSpUtils.getInitTime();
+        if (initTime == 0) {
+            mSpUtils.putInitTime(currentTime);
+        } else {
+            long l = currentTime - initTime;
+            if (l > maxTime) {
+                showTimeoutDialog();
+            }
+        }
+    }
+
+    /**
+     * 提醒用户限制已到期
+     */
+    private AlertDialog mTimeoutDialog;
+
+    private void showTimeoutDialog() {
+        if (mTimeoutDialog == null) {
+            mTimeoutDialog = new AlertDialog.Builder(this)
+                    .setMessage("许可证已过期")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setCancelable(false)
+                    .create();
+        }
+        mTimeoutDialog.show();
+    }
+
+    /**
+     * 如果设备未鉴权，定时获取鉴权信息
+     */
+    private void initAuthTask() {
+        mExecutorService.scheduleWithFixedDelay(authTask, 0, 10000, TimeUnit.MILLISECONDS);
+    }
+
+    private TimerTask authTask = new TimerTask() {
+        @Override
+        public void run() {
+            /*
+             * 鉴权
+             */
+            boolean auth = mSpUtils.getAuth();
+            if (!auth) {
+                String imei = getImei();
+                mSpUtils.putIMEI(imei);
+                Log.v("Huang, MainActivity", "deviceID = " + imei);
+                RetrofitHelper.quthDevice(imei);
+            }
+        }
+    };
 }

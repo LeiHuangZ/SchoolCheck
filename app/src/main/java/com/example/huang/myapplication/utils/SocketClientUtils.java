@@ -86,7 +86,7 @@ public class SocketClientUtils {
                         }
                         //与服务器心跳连接成功，30秒后开启下一次心跳
                         try {
-                            Thread.sleep(30000);
+                            Thread.sleep(60000);
                             mSocket.close();
                         } catch (Exception e) {
                             e.printStackTrace();
